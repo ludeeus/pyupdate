@@ -80,7 +80,6 @@ def update_all(base_dir):
 
 def upgrade_single(base_dir, name):
     """Update one component."""
-    print('Starting upgrade for ' + name)
     remote_info = get_info_all_components()[name]
     remote_file = remote_info[3]
     local_file = os.path.join(base_dir, remote_info[2])
