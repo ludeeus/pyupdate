@@ -3,11 +3,11 @@ import setuptools
 
 setuptools.setup(
     name="pyupdate",
-    version='0.0.10',
+    version='0.0.11',
     author="Joakim Sorensen",
     author_email="ludeeus@gmail.com",
-    description="A python module to update stuff.",
-    long_description="A python module to update stuff.",
+    description="A python package to update stuff.",
+    long_description="A python package to update stuff.",
     install_requires=['requests'],
     long_description_content_type="text/markdown",
     url="https://github.com/ludeeus/pyupdate",
