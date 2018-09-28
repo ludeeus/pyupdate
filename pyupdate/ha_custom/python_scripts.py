@@ -6,16 +6,6 @@ from requests import RequestException
 from pyupdate.ha_custom import common
 
 
-def _normalize_path(path):
-    path = path.replace('/', os.path.sep)\
-        .replace('\\', os.path.sep)
-
-    if path.startswith(os.path.sep):
-        path = path[1:]
-
-    return path
-
-
 def get_info_all_python_scripts(custom_repos=None):
     """Return all remote info if any."""
     remote_info = {}
@@ -28,7 +18,7 @@ def get_info_all_python_scripts(custom_repos=None):
                         py_script = [
                             name,
                             py_script['version'],
-                            _normalize_path(
+                            common.normalize_path(
                                 py_script['local_location']),
                             py_script['remote_location'],
                             py_script['visit_repo'],

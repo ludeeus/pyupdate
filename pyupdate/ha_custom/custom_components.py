@@ -6,16 +6,6 @@ from requests import RequestException
 from pyupdate.ha_custom import common
 
 
-def _normalize_path(path):
-    path = path.replace('/', os.path.sep)\
-        .replace('\\', os.path.sep)
-
-    if path.startswith(os.path.sep):
-        path = path[1:]
-
-    return path
-
-
 def get_info_all_components(custom_repos=None):
     """Return all remote info if any."""
     remote_info = {}
@@ -28,7 +18,7 @@ def get_info_all_components(custom_repos=None):
                         component = [
                             name,
                             component['version'],
-                            _normalize_path(
+                            common.normalize_path(
                                 component['local_location']),
                             component['remote_location'],
                             component['visit_repo'],
