@@ -42,7 +42,7 @@ def download_file(local_file, remote_file):
     if check_local_premissions(local_file):
         if check_remote_access(remote_file):
             with open(local_file, 'wb') as file:
-                file.write(requests.get(file).content)
+                file.write(requests.get(remote_file).content)
             file.close()
             retrun_value = True
         else:
