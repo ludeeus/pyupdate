@@ -1,5 +1,6 @@
 """Logic to handle common functions."""
 
+
 def get_default_repos():
     """Return default repos."""
     git_base = 'https://raw.githubusercontent.com/'
