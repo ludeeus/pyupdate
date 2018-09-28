@@ -109,4 +109,6 @@ def get_local_version(local_path):
                     return_value = matcher.group(1)
                 else:
                     return_value = False
+    else:
+        return_value = False
     return return_value
