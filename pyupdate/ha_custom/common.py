@@ -18,8 +18,7 @@ def get_repo_data(resource, extra_repos=None):
     elif resource == 'component':
         resource = 1
     repos = []
-    for repo in get_default_repos()[resource]:
-        repos.append(repo)
+    repos.append(str(get_default_repos()[resource]))
     if extra_repos is not None:
         for repo in extra_repos:
             repos.append(repo)
