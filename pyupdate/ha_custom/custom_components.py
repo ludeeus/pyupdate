@@ -6,7 +6,6 @@ from requests import RequestException
 from pyupdate.ha_custom import common
 
 
-@staticmethod
 def _normalize_path(path):
     path = path.replace('/', os.path.sep)\
         .replace('\\', os.path.sep)
