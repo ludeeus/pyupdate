@@ -43,7 +43,6 @@ def get_info_all_components():
     return remote_info
 
 
-
 def get_sensor_data():
     """Get sensor data."""
     components = get_info_all_components()
