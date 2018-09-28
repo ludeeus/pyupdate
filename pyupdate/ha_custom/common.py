@@ -27,7 +27,8 @@ def get_repo_data(resource, extra_repos=None):
 
 def check_local_premissions(file):
     """Check premissions of a file."""
-    return os.access(file, os.W_OK)
+    dirpath = os.path.dirname(file)
+    return os.access(dirpath, os.W_OK)
 
 
 def check_remote_access(file):

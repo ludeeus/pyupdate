@@ -92,8 +92,8 @@ def install(base_dir, name):
     if name in get_sensor_data()[0]:
         if '.' in name:
             component = str(name).split('.')[0]
-            if not os.path.isdir(component):
-                path = base_dir + '/custom_components/' + component
+            path = base_dir + '/custom_components/' + component
+            if not os.path.isdir(path):
                 os.mkdir(path)
         upgrade_single(base_dir, name)
 
