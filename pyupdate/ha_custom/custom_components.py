@@ -100,15 +100,12 @@ def install(base_dir, name):
 
 def get_local_version(local_path):
     """Return the local version if any."""
+    return_value = ''
     if os.path.isfile(local_path):
         with open(local_path, 'r') as local:
             pattern = re.compile(r"^__version__\s*=\s*['\"](.*)['\"]$")
             for line in local.readlines():
                 matcher = pattern.match(line)
                 if matcher:
-                    return_value = matcher.group(1)
-                else:
-                    return_value = False
-    else:
-        return_value = False
+                    return_value = str(matcher.group(1))
     return return_value
