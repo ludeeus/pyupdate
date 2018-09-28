@@ -16,10 +16,10 @@ def _normalize_path(path):
     return path
 
 
-def get_info_all_components():
+def get_info_all_components(custom_repos=None):
     """Return all remote info if any."""
     remote_info = {}
-    for url in common.get_repo_data('component'):
+    for url in common.get_repo_data('component', custom_repos):
         try:
             response = requests.get(url)
             if response.status_code == 200:

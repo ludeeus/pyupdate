@@ -6,17 +6,22 @@ import requests
 def get_default_repos():
     """Return default repos."""
     git_base = 'https://raw.githubusercontent.com/'
-    cards = git_base + 'custom-cards/information/master/repos.json'
-    components = git_base + 'custom-components/information/master/repos.json'
-    return [cards, components]
+    card = git_base + 'custom-cards/information/master/repos.json'
+    component = git_base + 'custom-components/information/master/repos.json'
+    python_script = None
+    return [component, card, python_script]
 
 
 def get_repo_data(resource, extra_repos=None):
     """Update the data about components."""
-    if resource == 'card':
+    if resource == 'component':
         resource = 0
-    elif resource == 'component':
+    elif resource == 'card':
         resource = 1
+    elif resource == 'python_script':
+        resource = 2
+    else:
+        resource = 0
     repos = []
     repos.append(str(get_default_repos()[resource]))
     if extra_repos is not None:
