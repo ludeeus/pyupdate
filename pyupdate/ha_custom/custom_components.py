@@ -32,9 +32,9 @@ def get_info_all_components(custom_repos=None):
     return remote_info
 
 
-def get_sensor_data():
+def get_sensor_data(custom_repos=None):
     """Get sensor data."""
-    components = get_info_all_components()
+    components = get_info_all_components(custom_repos)
     cahce_data = {}
     cahce_data['domain'] = 'custom_components'
     cahce_data['has_update'] = []
@@ -68,9 +68,9 @@ def update_all(base_dir):
             upgrade_single(base_dir, name)
 
 
-def upgrade_single(base_dir, name):
+def upgrade_single(base_dir, name, custom_repos=None):
     """Update one component."""
-    remote_info = get_info_all_components()[name]
+    remote_info = get_info_all_components(custom_repos)[name]
     remote_file = remote_info[3]
     local_file = os.path.join(base_dir, remote_info[2])
     common.download_file(local_file, remote_file)
