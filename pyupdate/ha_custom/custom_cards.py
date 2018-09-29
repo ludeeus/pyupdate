@@ -72,7 +72,7 @@ def get_sensor_data(base_dir, custom_repos=None):
 
 def update_all(base_dir, custom_repos=None):
     """Update all cards."""
-    updates = get_sensor_data(custom_repos)[0]['has_update']
+    updates = get_sensor_data(base_dir, custom_repos)[0]['has_update']
     if updates is not None:
         for name in updates:
             upgrade_single(base_dir, name, custom_repos)
@@ -100,7 +100,7 @@ def upgrade_lib(base_dir, name, custom_repos=None):
 
 def install(base_dir, name, custom_repos=None):
     """Install single card."""
-    if name in get_sensor_data(custom_repos)[0]:
+    if name in get_sensor_data(base_dir, custom_repos)[0]:
         upgrade_single(base_dir, name, custom_repos)
 
 
