@@ -20,10 +20,10 @@ def get_repo_data(resource, extra_repos=None):
     """Update the data about components."""
     repos = []
     default_repos = get_default_repos()[resource]
-    if not None in default_repos:
+    if None not in default_repos:
         for repo in default_repos:
             repos.append(str(repo))
-    if not extra_repos is None:
+    if extra_repos is not None:
         for repo in extra_repos:
             repos.append(str(repo))
     return repos
@@ -67,6 +67,7 @@ def normalize_path(path):
         path = path[1:]
 
     return path
+
 
 def replace_all(file, search, replace):
     """Replace all occupancies of search in file."""
