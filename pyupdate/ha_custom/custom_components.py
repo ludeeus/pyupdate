@@ -65,7 +65,7 @@ def update_all(base_dir, custom_repos=None):
     updates = get_sensor_data(custom_repos)[0]['has_update']
     if updates is not None:
         for name in updates:
-            upgrade_single(base_dir, name)
+            upgrade_single(base_dir, name, custom_repos)
 
 
 def upgrade_single(base_dir, name, custom_repos=None):
@@ -84,7 +84,7 @@ def install(base_dir, name, custom_repos=None):
             path = base_dir + '/custom_components/' + component
             if not os.path.isdir(path):
                 os.mkdir(path)
-        upgrade_single(base_dir, name)
+        upgrade_single(base_dir, name, custom_repos)
 
 
 def get_local_version(local_path):
