@@ -20,7 +20,7 @@ def get_repo_data(resource, extra_repos=None):
     """Update the data about components."""
     repos = []
     default_repos = get_default_repos()[resource]
-    if None in default_repos:
+    if not None in default_repos:
         for repo in default_repos:
             repos.append(str(repo))
     if not extra_repos is None:
