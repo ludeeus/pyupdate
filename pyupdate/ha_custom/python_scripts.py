@@ -79,11 +79,6 @@ def upgrade_single(base_dir, name, custom_repos=None):
 def install(base_dir, name, custom_repos=None):
     """Install single python_script."""
     if name in get_sensor_data(custom_repos)[0]:
-        if '.' in name:
-            python_script = str(name).split('.')[0]
-            path = base_dir + '/python_scripts/' + python_script
-            if not os.path.isdir(path):
-                os.mkdir(path)
         upgrade_single(base_dir, name, custom_repos)
 
 

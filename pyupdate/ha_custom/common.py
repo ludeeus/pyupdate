@@ -1,5 +1,7 @@
 """Logic to handle common functions."""
 import os
+import fileinput
+import sys
 import requests
 
 
@@ -65,3 +67,10 @@ def normalize_path(path):
         path = path[1:]
 
     return path
+
+def replace_all(file, search, replace):
+    """Replace all occupancies of search in file."""
+    for line in fileinput.input(file, inplace=True):
+        if search in line:
+            line = line.replace(search, replace)
+        sys.stdout.write(line)
