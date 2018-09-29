@@ -32,7 +32,7 @@ def get_info_all_components(custom_repos=None):
     return remote_info
 
 
-def get_sensor_data(custom_repos=None):
+def get_sensor_data(show_installable=False, custom_repos=None):
     """Get sensor data."""
     components = get_info_all_components(custom_repos)
     cahce_data = {}
@@ -46,23 +46,24 @@ def get_sensor_data(custom_repos=None):
             has_update = (remote_version and
                           remote_version != local_version)
             not_local = (remote_version and not local_version)
-            if has_update and not not_local:
-                count_updateable = count_updateable + 1
-                cahce_data['has_update'].append(name)
-            cahce_data[name] = {
-                "local": local_version,
-                "remote": remote_version,
-                "has_update": has_update,
-                "not_local": not_local,
-                "repo": component[4],
-                "change_log": component[5],
-            }
+            if not not_local or show_installable:
+                if has_update and not not_local:
+                    count_updateable = count_updateable + 1
+                    cahce_data['has_update'].append(name)
+                cahce_data[name] = {
+                    "local": local_version,
+                    "remote": remote_version,
+                    "has_update": has_update,
+                    "not_local": not_local,
+                    "repo": component[4],
+                    "change_log": component[5],
+                }
     return [cahce_data, count_updateable]
 
 
-def update_all(base_dir, custom_repos=None):
+def update_all(base_dir, show_installable=False, custom_repos=None):
     """Update all components."""
-    updates = get_sensor_data(custom_repos)[0]['has_update']
+    updates = get_sensor_data(show_installable, custom_repos)[0]['has_update']
     if updates is not None:
         for name in updates:
             upgrade_single(base_dir, name, custom_repos)
@@ -76,9 +77,9 @@ def upgrade_single(base_dir, name, custom_repos=None):
     common.download_file(local_file, remote_file)
 
 
-def install(base_dir, name, custom_repos=None):
+def install(base_dir, name, show_installable=False, custom_repos=None):
     """Install single component."""
-    if name in get_sensor_data(custom_repos)[0]:
+    if name in get_sensor_data(show_installable, custom_repos)[0]:
         if '.' in name:
             component = str(name).split('.')[0]
             path = base_dir + '/custom_components/' + component
