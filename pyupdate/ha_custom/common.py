@@ -23,10 +23,13 @@ def get_repo_data(resource, extra_repos=None):
     else:
         resource = 0
     repos = []
-    repos.append(str(get_default_repos()[resource]))
+    default_repos = str(get_default_repos()[resource])
+    if default_repos is not None:
+        for repo in extra_repos:
+            repos.append(str(repo))
     if extra_repos is not None:
         for repo in extra_repos:
-            repos.append(repo)
+            repos.append(str(repo))
     return repos
 
 
