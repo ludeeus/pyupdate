@@ -32,8 +32,8 @@ def get_info_all_cards(custom_repos=None):
 def get_lovelace_gen(base_dir):
     """Get lovelace-gen true if in use."""
     return_value = False
-    conf_file = os.path.join(base_dir, 'ui-lovelace.yaml')
-    lovelace_dir = os.path.join(base_dir, 'lovelace')
+    conf_file = base_dir + '/ui-lovelace.yaml'
+    lovelace_dir = base_dir + '/lovelace'
     if os.path.isfile(conf_file) and os.path.isdir(lovelace_dir):
         with open(conf_file, 'r') as local:
             for line in local.readlines():
