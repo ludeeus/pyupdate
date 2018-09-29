@@ -56,7 +56,7 @@ def get_sensor_data(base_dir, show_installable=False, custom_repos=None):
             has_update = (remote_version and
                           remote_version != local_version)
             not_local = (remote_version and not local_version)
-            if not not_local or show_installable:
+            if (not not_local and remote_version) or show_installable:
                 if has_update and not not_local:
                     count_updateable = count_updateable + 1
                     cahce_data['has_update'].append(name)
