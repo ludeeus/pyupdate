@@ -107,7 +107,7 @@ def install(base_dir, name, custom_repos=None):
 def update_resource_version(base_dir, name, custom_repos=None):
     """Update the ui-lovelace file."""
     local_version = get_local_version(base_dir, name)
-    remote_version = get_info_all_cards(custom_repos)[name]['remote']
+    remote_version = get_info_all_cards(custom_repos)[name][1]
     conf_file = get_conf_file_path(base_dir)
     common.replace_all(conf_file,
                        name + '.js?v=' + local_version,
