@@ -111,7 +111,7 @@ def update_resource_version(base_dir, name, custom_repos=None):
     conf_file = get_conf_file_path(base_dir)
     common.replace_all(conf_file,
                        name + '.js?v=' + str(local_version),
-                       name + '.js?v=' + srt(remote_version))
+                       name + '.js?v=' + str(remote_version))
 
 
 def get_card_dir(base_dir, name):
