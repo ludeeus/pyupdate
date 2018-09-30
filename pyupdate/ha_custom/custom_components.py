@@ -1,6 +1,6 @@
 """Logic to handle custom_components."""
 import os
-import re
+#import re
 import requests
 from requests import RequestException
 from pyupdate.ha_custom import common
@@ -89,14 +89,29 @@ def install(base_dir, name, show_installable=False, custom_repos=None):
         upgrade_single(base_dir, name, custom_repos)
 
 
+
+
 def get_local_version(local_path):
     """Return the local version if any."""
-    return_value = ''
+    return_value = False
     if os.path.isfile(local_path):
         with open(local_path, 'r') as local:
-            pattern = re.compile(r"^__version__\s*=\s*['\"](.*)['\"]$")
             for line in local.readlines():
-                matcher = pattern.match(line)
-                if matcher:
-                    return_value = str(matcher.group(1))
+                if '__version__' in line:
+                    return_value = line.split("'")[1]
+                    break
+        local.close()
     return return_value
+
+
+#def get_local_version(local_path):
+#    """Return the local version if any."""
+#    return_value = ''
+#    if os.path.isfile(local_path):
+#        with open(local_path, 'r') as local:
+#            pattern = re.compile(r"^__version__\s*=\s*['\"](.*)['\"]$")
+#            for line in local.readlines():
+#                matcher = pattern.match(line)
+#                if matcher:
+#                    return_value = str(matcher.group(1))
+#    return return_value
