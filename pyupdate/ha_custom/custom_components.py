@@ -88,8 +88,6 @@ def install(base_dir, name, show_installable=False, custom_repos=None):
         upgrade_single(base_dir, name, custom_repos)
 
 
-
-
 def get_local_version(local_path):
     """Return the local version if any."""
     return_value = False
