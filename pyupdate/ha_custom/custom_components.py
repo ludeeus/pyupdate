@@ -1,6 +1,5 @@
 """Logic to handle custom_components."""
 import os
-#import re
 import requests
 from requests import RequestException
 from pyupdate.ha_custom import common
@@ -102,16 +101,3 @@ def get_local_version(local_path):
                     break
         local.close()
     return return_value
-
-
-#def get_local_version(local_path):
-#    """Return the local version if any."""
-#    return_value = ''
-#    if os.path.isfile(local_path):
-#        with open(local_path, 'r') as local:
-#            pattern = re.compile(r"^__version__\s*=\s*['\"](.*)['\"]$")
-#            for line in local.readlines():
-#                matcher = pattern.match(line)
-#                if matcher:
-#                    return_value = str(matcher.group(1))
-#    return return_value
