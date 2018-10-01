@@ -60,8 +60,7 @@ def download_file(local_file, remote_file):
 
 def normalize_path(path):
     """Normalize the path."""
-    path = path.replace('/', os.path.sep)\
-        .replace('\\', os.path.sep)
+    path = path.replace('/', os.path.sep).replace('\\', os.path.sep)
 
     if path.startswith(os.path.sep):
         path = path[1:]

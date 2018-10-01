@@ -85,8 +85,7 @@ def upgrade_single(base_dir, name, custom_repos=None):
     """Update one card."""
     remote_info = get_info_all_cards(custom_repos)[name]
     remote_file = remote_info[2]
-    local_file = os.path.join(get_card_dir(base_dir, name),
-                              name + '.js')
+    local_file = get_card_dir(base_dir, name) + name + '.js'
     common.download_file(local_file, remote_file)
     upgrade_lib(base_dir, name, custom_repos)
     update_resource_version(base_dir, name, custom_repos)
@@ -96,8 +95,7 @@ def upgrade_lib(base_dir, name, custom_repos=None):
     """Update one card-lib."""
     remote_info = get_info_all_cards(custom_repos)[name]
     remote_file = remote_info[2][:-3] + '.lib.js'
-    local_file = os.path.join(get_card_dir(base_dir, name),
-                              name + '.lib.js')
+    local_file = get_card_dir(base_dir, name) + name + '.lib.js'
     common.download_file(local_file, remote_file)
 
 

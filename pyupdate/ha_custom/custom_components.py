@@ -42,7 +42,7 @@ def get_sensor_data(base_dir, show_installable=False, custom_repos=None):
     if components:
         for name, component in components.items():
             remote_version = component[1]
-            local_file = os.path.join(base_dir, component[2])
+            local_file = base_dir + component[2]
             local_version = get_local_version(local_file)
             has_update = (remote_version and
                           remote_version != local_version)
@@ -76,7 +76,7 @@ def upgrade_single(base_dir, name, custom_repos=None):
     """Update one component."""
     remote_info = get_info_all_components(custom_repos)[name]
     remote_file = remote_info[3]
-    local_file = os.path.join(base_dir, remote_info[2])
+    local_file = base_dir + remote_info[2]
     common.download_file(local_file, remote_file)
 
 
