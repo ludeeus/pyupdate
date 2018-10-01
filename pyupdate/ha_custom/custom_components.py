@@ -32,7 +32,7 @@ def get_info_all_components(custom_repos=None):
     return remote_info
 
 
-def get_sensor_data(show_installable=False, custom_repos=None):
+def get_sensor_data(base_dir, show_installable=False, custom_repos=None):
     """Get sensor data."""
     components = get_info_all_components(custom_repos)
     cahce_data = {}
@@ -42,7 +42,7 @@ def get_sensor_data(show_installable=False, custom_repos=None):
     if components:
         for name, component in components.items():
             remote_version = component[1]
-            local_version = get_local_version(component[2])
+            local_version = get_local_version(base_dir + component[2])
             has_update = (remote_version and
                           remote_version != local_version)
             not_local = (remote_version and not local_version)
@@ -64,7 +64,8 @@ def get_sensor_data(show_installable=False, custom_repos=None):
 
 def update_all(base_dir, show_installable=False, custom_repos=None):
     """Update all components."""
-    updates = get_sensor_data(show_installable, custom_repos)[0]['has_update']
+    updates = get_sensor_data(base_dir,
+                              show_installable, custom_repos)[0]['has_update']
     if updates is not None:
         for name in updates:
             upgrade_single(base_dir, name, custom_repos)
@@ -80,7 +81,7 @@ def upgrade_single(base_dir, name, custom_repos=None):
 
 def install(base_dir, name, show_installable=False, custom_repos=None):
     """Install single component."""
-    if name in get_sensor_data(show_installable, custom_repos)[0]:
+    if name in get_sensor_data(base_dir, show_installable, custom_repos)[0]:
         if '.' in name:
             component = str(name).split('.')[0]
             path = base_dir + '/custom_components/' + component
@@ -89,11 +90,11 @@ def install(base_dir, name, show_installable=False, custom_repos=None):
         upgrade_single(base_dir, name, custom_repos)
 
 
-def get_local_version(local_path):
+def get_local_version(path):
     """Return the local version if any."""
     return_value = ''
-    if os.path.isfile(local_path):
-        with open(local_path, 'r') as local:
+    if os.path.isfile(path):
+        with open(path, 'r') as local:
             pattern = re.compile(r"^__version__\s*=\s*['\"](.*)['\"]$")
             for line in local.readlines():
                 matcher = pattern.match(line)

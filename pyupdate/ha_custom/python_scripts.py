@@ -32,7 +32,7 @@ def get_info_all_python_scripts(custom_repos=None):
     return remote_info
 
 
-def get_sensor_data(show_installable=False, custom_repos=None):
+def get_sensor_data(base_dir, show_installable=False, custom_repos=None):
     """Get sensor data."""
     python_scripts = get_info_all_python_scripts(custom_repos)
     cahce_data = {}
@@ -42,7 +42,7 @@ def get_sensor_data(show_installable=False, custom_repos=None):
     if python_scripts:
         for name, py_script in python_scripts.items():
             remote_version = py_script[1]
-            local_version = get_local_version(py_script[2])
+            local_version = get_local_version(base_dir + py_script[2])
             has_update = (remote_version and
                           remote_version != local_version)
             not_local = (remote_version and not local_version)
@@ -64,7 +64,8 @@ def get_sensor_data(show_installable=False, custom_repos=None):
 
 def update_all(base_dir, show_installable=False, custom_repos=None):
     """Update all python_script."""
-    updates = get_sensor_data(show_installable, custom_repos)[0]['has_update']
+    updates = get_sensor_data(base_dir,
+                              show_installable, custom_repos)[0]['has_update']
     if updates is not None:
         for name in updates:
             upgrade_single(base_dir, name, custom_repos)
@@ -80,7 +81,7 @@ def upgrade_single(base_dir, name, custom_repos=None):
 
 def install(base_dir, name, show_installable=False, custom_repos=None):
     """Install single python_script."""
-    if name in get_sensor_data(show_installable, custom_repos)[0]:
+    if name in get_sensor_data(base_dir, show_installable, custom_repos)[0]:
         upgrade_single(base_dir, name, custom_repos)
 
 
