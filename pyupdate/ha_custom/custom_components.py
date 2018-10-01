@@ -42,7 +42,8 @@ def get_sensor_data(base_dir, show_installable=False, custom_repos=None):
     if components:
         for name, component in components.items():
             remote_version = component[1]
-            local_version = get_local_version(base_dir + component[2])
+            local_file = os.path.join(base_dir, component[2])
+            local_version = get_local_version(local_file)
             has_update = (remote_version and
                           remote_version != local_version)
             not_local = (remote_version and not local_version)
