@@ -2,6 +2,7 @@
 import os
 import fileinput
 import logging
+import subprocess
 import sys
 import requests
 
@@ -81,3 +82,13 @@ def replace_all(file, search, replace):
         if search in line:
             line = line.replace(search, replace)
         sys.stdout.write(line)
+
+
+def update(package):
+    """Update a pip package."""
+    subprocess.call([sys.executable,
+                     "-m",
+                     "pip",
+                     "install",
+                     "--upgrade",
+                     package])
