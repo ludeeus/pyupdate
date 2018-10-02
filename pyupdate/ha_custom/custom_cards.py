@@ -73,7 +73,7 @@ def get_sensor_data(base_dir, show_installable=False, custom_repos=None):
                     "repo": card[3],
                     "change_log": card[4],
                 }
-    LOGGER.debug('get_sensor_data: [%s, %s]', cahce_data, count_updateable)    
+    LOGGER.debug('get_sensor_data: [%s, %s]', cahce_data, count_updateable)
     return [cahce_data, count_updateable]
 
 
