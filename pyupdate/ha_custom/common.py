@@ -1,9 +1,11 @@
 """Logic to handle common functions."""
 import os
 import fileinput
+import logging
 import sys
 import requests
 
+LOGGER = logging.getLogger(__name__)
 
 def get_default_repos():
     """Return default repos."""
@@ -43,6 +45,7 @@ def check_remote_access(file):
 
 def download_file(local_file, remote_file):
     """Download a file."""
+    LOGGER.debug("Downloading '%s' to '%s'", remote_file, local_file)
     if check_local_premissions(local_file):
         if check_remote_access(remote_file):
             with open(local_file, 'wb') as file:

@@ -1,9 +1,12 @@
 """Logic to handle custom_components."""
 import os
 import re
+import logging
 import requests
 from requests import RequestException
 from pyupdate.ha_custom import common
+
+LOGGER = logging.getLogger(__name__)
 
 
 def get_info_all_components(custom_repos=None):
@@ -29,6 +32,7 @@ def get_info_all_components(custom_repos=None):
                         print('Could not get remote info for ' + name)
         except RequestException:
             print('Could not get remote info for ' + url)
+    LOGGER.debug('get_info_all_components: %s', remote_info)
     return remote_info
 
 

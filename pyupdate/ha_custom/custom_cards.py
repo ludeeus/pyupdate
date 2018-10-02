@@ -1,8 +1,11 @@
 """Logic to handle custom_cards."""
+import logging
 import os
 import requests
 from requests import RequestException
 from pyupdate.ha_custom import common
+
+LOGGER = logging.getLogger(__name__)
 
 
 def get_info_all_cards(custom_repos=None):
@@ -26,6 +29,7 @@ def get_info_all_cards(custom_repos=None):
                         print('Could not get remote info for ' + name)
         except RequestException:
             print('Could not get remote info for ' + url)
+    LOGGER.debug('get_info_all_cards: %s', remote_info)
     return remote_info
 
 

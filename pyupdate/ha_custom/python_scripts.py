@@ -1,10 +1,12 @@
 """Logic to handle python_scripts."""
+import logging
 import os
 import re
 import requests
 from requests import RequestException
 from pyupdate.ha_custom import common
 
+LOGGER = logging.getLogger(__name__)
 
 def get_info_all_python_scripts(custom_repos=None):
     """Return all remote info if any."""
@@ -29,6 +31,7 @@ def get_info_all_python_scripts(custom_repos=None):
                         print('Could not get remote info for ' + name)
         except RequestException:
             print('Could not get remote info for ' + url)
+    LOGGER.debug('get_info_all_python_scripts: %s', remote_info)
     return remote_info
 
 
