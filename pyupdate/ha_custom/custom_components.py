@@ -110,5 +110,5 @@ def get_local_version(path):
             for line in local.readlines():
                 matcher = ret.match(line)
                 if matcher:
-                    return_value = str(matcher.group(1))
+                    return_value = str(matcher.group(2))
     return return_value
