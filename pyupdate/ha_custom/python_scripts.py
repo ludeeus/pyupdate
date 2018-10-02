@@ -101,9 +101,9 @@ def get_local_version(path):
     return_value = ''
     if os.path.isfile(path):
         with open(path, 'r') as local:
-            pattern = re.compile(r"^__version__\s*=\s*['\"](.*)['\"]$")
+            ret = re.compile(r"^\b(VERSION|__version__)\s*=\s*['\"](.*)['\"]")
             for line in local.readlines():
-                matcher = pattern.match(line)
+                matcher = ret.match(line)
                 if matcher:
                     return_value = str(matcher.group(1))
     return return_value
