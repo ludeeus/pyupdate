@@ -8,6 +8,7 @@ from pyupdate.ha_custom import common
 
 LOGGER = logging.getLogger(__name__)
 
+
 def get_info_all_python_scripts(custom_repos=None):
     """Return all remote info if any."""
     remote_info = {}

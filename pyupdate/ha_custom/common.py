@@ -7,6 +7,7 @@ import requests
 
 LOGGER = logging.getLogger(__name__)
 
+
 def get_default_repos():
     """Return default repos."""
     git_base = 'https://raw.githubusercontent.com/'
