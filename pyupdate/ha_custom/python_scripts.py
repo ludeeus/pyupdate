@@ -64,6 +64,7 @@ def get_sensor_data(base_dir, show_installable=False, custom_repos=None):
                     "repo": py_script[4],
                     "change_log": py_script[5],
                 }
+    LOGGER.debug('get_sensor_data: [%s, %s]', cahce_data, count_updateable)
     return [cahce_data, count_updateable]
 
 
@@ -72,16 +73,21 @@ def update_all(base_dir, show_installable=False, custom_repos=None):
     updates = get_sensor_data(base_dir,
                               show_installable, custom_repos)[0]['has_update']
     if updates is not None:
+        LOGGER.info('update_all: "%s"', updates)
         for name in updates:
             upgrade_single(base_dir, name, custom_repos)
+    else:
+        LOGGER.debug('update_all: No updates avaiable.')
 
 
 def upgrade_single(base_dir, name, custom_repos=None):
     """Update one python_script."""
+    LOGGER.debug('upgrade_single started: "%s"', name)
     remote_info = get_info_all_python_scripts(custom_repos)[name]
     remote_file = remote_info[3]
     local_file = base_dir + '/' + str(remote_info[2])
     common.download_file(local_file, remote_file)
+    LOGGER.info('upgrade_single finished: "%s"', name)
 
 
 def install(base_dir, name, show_installable=False, custom_repos=None):

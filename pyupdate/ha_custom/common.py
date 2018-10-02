@@ -29,6 +29,7 @@ def get_repo_data(resource, extra_repos=None):
     if extra_repos is not None:
         for repo in extra_repos:
             repos.append(str(repo))
+    LOGGER.debug('get_repo_data: "%s"', repos)
     return repos
 
 
@@ -74,6 +75,8 @@ def normalize_path(path):
 
 def replace_all(file, search, replace):
     """Replace all occupancies of search in file."""
+    LOGGER.debug('Replacing all "%s" with "%s" in file "%s"', search,
+                 replace, file)
     for line in fileinput.input(file, inplace=True):
         if search in line:
             line = line.replace(search, replace)

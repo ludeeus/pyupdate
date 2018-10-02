@@ -73,6 +73,7 @@ def get_sensor_data(base_dir, show_installable=False, custom_repos=None):
                     "repo": card[3],
                     "change_log": card[4],
                 }
+    LOGGER.debug('get_sensor_data: [%s, %s]', cahce_data, count_updateable)    
     return [cahce_data, count_updateable]
 
 
@@ -81,18 +82,23 @@ def update_all(base_dir, show_installable=False, custom_repos=None):
     updates = get_sensor_data(base_dir, show_installable,
                               custom_repos)[0]['has_update']
     if updates is not None:
+        LOGGER.info('update_all: "%s"', updates)
         for name in updates:
             upgrade_single(base_dir, name, custom_repos)
+    else:
+        LOGGER.debug('update_all: No updates avaiable.')
 
 
 def upgrade_single(base_dir, name, custom_repos=None):
     """Update one card."""
+    LOGGER.debug('upgrade_single started: "%s"', name)
     remote_info = get_info_all_cards(custom_repos)[name]
     remote_file = remote_info[2]
     local_file = get_card_dir(base_dir, name) + name + '.js'
     common.download_file(local_file, remote_file)
     upgrade_lib(base_dir, name, custom_repos)
     update_resource_version(base_dir, name, custom_repos)
+    LOGGER.info('upgrade_single finished: "%s"', name)
 
 
 def upgrade_lib(base_dir, name, custom_repos=None):
