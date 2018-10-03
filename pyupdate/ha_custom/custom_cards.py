@@ -109,9 +109,9 @@ def upgrade_lib(base_dir, name, custom_repos=None):
     common.download_file(local_file, remote_file)
 
 
-def install(base_dir, name, show_installable=False, custom_repos=None):
+def install(base_dir, name, custom_repos=None):
     """Install single card."""
-    if name in get_sensor_data(base_dir, show_installable, custom_repos)[0]:
+    if name in get_sensor_data(base_dir, True, custom_repos)[0]:
         upgrade_single(base_dir, name, custom_repos)
 
 

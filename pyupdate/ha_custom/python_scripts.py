@@ -90,9 +90,9 @@ def upgrade_single(base_dir, name, custom_repos=None):
     LOGGER.info('upgrade_single finished: "%s"', name)
 
 
-def install(base_dir, name, show_installable=False, custom_repos=None):
+def install(base_dir, name, custom_repos=None):
     """Install single python_script."""
-    if name in get_sensor_data(base_dir, show_installable, custom_repos)[0]:
+    if name in get_sensor_data(base_dir, True, custom_repos)[0]:
         upgrade_single(base_dir, name, custom_repos)
 
 
