@@ -124,7 +124,7 @@ def update_requirements(path):
             for line in local.readlines():
                 matcher = ret.match(line)
                 if matcher:
-                    requirements = str(matcher.group(1))
+                    requirements = matcher.group(1)
         local.close()
         if requirements is not None:
             for package in requirements:
