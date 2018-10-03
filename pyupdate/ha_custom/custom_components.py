@@ -87,6 +87,7 @@ def upgrade_single(base_dir, name, custom_repos=None):
     remote_file = remote_info[3]
     local_file = base_dir + '/' + str(remote_info[2])
     common.download_file(local_file, remote_file)
+    update_requirements(local_file)
     LOGGER.info('upgrade_single finished: "%s"', name)
 
 
@@ -112,3 +113,17 @@ def get_local_version(path):
                 if matcher:
                     return_value = str(matcher.group(2))
     return return_value
+
+def update_requirements(path):
+    """Update the requirements for a python file."""
+    requirements = None
+    if os.path.isfile(path):
+        with open(path, 'r') as local:
+            for line in local.readlines():
+                if 'REQUIREMENTS = ' in line:
+                    requirements = line.split(" = ")[1]
+        local.close()
+        if requirements is not None:
+            for package in requirements:
+                LOGGER.info('Upgrading %s', package)
+                common.update(package)
