@@ -120,12 +120,13 @@ def update_requirements(path):
     requirements = [None]
     if os.path.isfile(path):
         with open(path, 'r') as local:
+            ret = re.compile(r"^\bREQUIREMENTS\s*=\s*(.*)")
             for line in local.readlines():
-                if 'REQUIREMENTS = ' in line:
-                    requirements = line.split("[")[1]
-                    requirements = requirements.split("]")[0]
+                matcher = ret.match(line)
+                if matcher:
+                    requirements = str(matcher.group(1))
         local.close()
         if requirements is not None:
-            for package in requirements.split(","):
+            for package in str(requirements).split(","):
                 LOGGER.info('Upgrading %s', package)
                 common.update(package)
