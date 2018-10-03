@@ -114,6 +114,7 @@ def get_local_version(path):
                     return_value = str(matcher.group(2))
     return return_value
 
+
 def update_requirements(path):
     """Update the requirements for a python file."""
     requirements = None
