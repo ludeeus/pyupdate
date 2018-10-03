@@ -91,4 +91,4 @@ def update(package):
                      "pip",
                      "install",
                      "--upgrade",
-                     package])
+                     str(package)])

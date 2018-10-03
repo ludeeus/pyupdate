@@ -127,6 +127,6 @@ def update_requirements(path):
                     requirements = str(matcher.group(1))
         local.close()
         if requirements is not None:
-            for package in str(requirements).split(","):
+            for package in requirements:
                 LOGGER.info('Upgrading %s', package)
                 common.update(package)
