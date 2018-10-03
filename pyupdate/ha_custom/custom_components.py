@@ -117,14 +117,15 @@ def get_local_version(path):
 
 def update_requirements(path):
     """Update the requirements for a python file."""
-    requirements = None
+    requirements = [None]
     if os.path.isfile(path):
         with open(path, 'r') as local:
             for line in local.readlines():
                 if 'REQUIREMENTS = ' in line:
-                    requirements = line.split(" = ")[1]
+                    requirements = line.split("[")[1]
+                    requirements = requirements.split("]")[0]
         local.close()
         if requirements is not None:
-            for package in requirements:
+            for package in requirements.split(","):
                 LOGGER.info('Upgrading %s', package)
                 common.update(package)
