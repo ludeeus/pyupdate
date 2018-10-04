@@ -128,8 +128,10 @@ def update_requirements(path):
                     val = val.replace('[', '')
                     val = val.replace(']', '')
                     val = val.replace(',', '')
+                    val = val.replace("'", "")
                     requirements = val
         local.close()
         if requirements is not None:
-            LOGGER.info('Upgrading %s', requirements)
-            common.update(requirements)
+            for package in requirements.split(' '):
+                LOGGER.info('Upgrading %s', package)
+                common.update(package)
