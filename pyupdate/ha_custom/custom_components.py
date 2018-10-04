@@ -124,9 +124,12 @@ def update_requirements(path):
             for line in local.readlines():
                 matcher = ret.match(line)
                 if matcher:
-                    requirements = matcher.group(1)
+                    val = str(matcher.group(1))
+                    val = val.replace('[', '')
+                    val = val.replace(']', '')
+                    val = val.replace(',', '')
+                    requirements = val
         local.close()
         if requirements is not None:
-            for package in requirements:
-                LOGGER.info('Upgrading %s', package)
-                common.update(package)
+            LOGGER.info('Upgrading %s', requirements)
+            common.update(requirements)
