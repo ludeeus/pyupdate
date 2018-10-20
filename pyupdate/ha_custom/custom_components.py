@@ -117,7 +117,7 @@ def get_local_version(path):
 
 def update_requirements(path):
     """Update the requirements for a python file."""
-    requirements = [None]
+    requirements = None
     if os.path.isfile(path):
         with open(path, 'r') as local:
             ret = re.compile(r"^\bREQUIREMENTS\s*=\s*(.*)")
