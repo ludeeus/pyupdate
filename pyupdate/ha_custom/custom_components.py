@@ -127,7 +127,7 @@ def update_requirements(path):
                     val = str(matcher.group(1))
                     val = val.replace('[', '')
                     val = val.replace(']', '')
-                    val = val.replace(',', '')
+                    val = val.replace(',', ' ')
                     val = val.replace("'", "")
                     requirements = val
         local.close()
