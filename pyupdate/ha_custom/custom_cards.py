@@ -154,7 +154,7 @@ def get_local_version(base_dir, name):
     card_config = ''
     conf_file = get_conf_file_path(base_dir)
     if os.path.isfile(conf_file):
-        with open(conf_file, 'r') as local:
+        with open(conf_file, 'r', errors='ignore') as local:
             for line in local.readlines():
                 if '/' + name + '.js' in line:
                     card_config = line
