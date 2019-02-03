@@ -130,20 +130,12 @@ def get_card_dir(base_dir, name):
     conf_file = get_conf_file_path(base_dir)
     with open(conf_file, 'r') as local:
         for line in local.readlines():
-            if get_lovelace_gen(base_dir):
-                if name + '.js' in line:
-                    card = line.split('!resource ')[1].split(name + '.js')
-                    card_dir = base_dir + '/lovelace/' + card[0]
-                    break
-                else:
-                    card_dir = base_dir + '/lovelace/'
+            if '/' + name + '.js' in line:
+                card = line.split(': ')[1].split(name + '.js')
+                card_dir = base_dir + card[0].replace("local", "www")
+                break
             else:
-                if '/' + name + '.js' in line:
-                    card = line.split(': ')[1].split(name + '.js')
-                    card_dir = base_dir + card[0].replace("local", "www")
-                    break
-                else:
-                    card_dir = base_dir + '/www/'
+                card_dir = base_dir + '/www/'
     return card_dir
 
 
