@@ -97,6 +97,7 @@ def upgrade_single(base_dir, name, custom_repos=None):
     local_file = get_card_dir(base_dir, name) + name + '.js'
     common.download_file(local_file, remote_file)
     upgrade_lib(base_dir, name, custom_repos)
+    upgrade_editor(base_dir, name, custom_repos)
     update_resource_version(base_dir, name, custom_repos)
     LOGGER.info('upgrade_single finished: "%s"', name)
 
@@ -108,6 +109,12 @@ def upgrade_lib(base_dir, name, custom_repos=None):
     local_file = get_card_dir(base_dir, name) + name + '.lib.js'
     common.download_file(local_file, remote_file)
 
+def upgrade_editor(base_dir, name, custom_repos=None):
+    """Update one card-editor."""
+    remote_info = get_info_all_cards(custom_repos)[name]
+    remote_file = remote_info[2][:-3] + '-editor.js'
+    local_file = get_card_dir(base_dir, name) + name + '-editor.js'
+    common.download_file(local_file, remote_file)
 
 def install(base_dir, name, custom_repos=None):
     """Install single card."""
