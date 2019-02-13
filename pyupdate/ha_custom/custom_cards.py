@@ -17,7 +17,6 @@ class Loader(yaml.SafeLoader):
 
     def __init__(self, stream: IO) -> None:
         """Initialise Loader."""
-
         try:
             self._root = os.path.split(stream.name)[0]
         except AttributeError:
@@ -28,7 +27,6 @@ class Loader(yaml.SafeLoader):
 
 def construct_include(loader: Loader, node: yaml.Node) -> Any:
     """Include file referenced at node."""
-
     filename = os.path.abspath(
         os.path.join(loader._root, loader.construct_scalar(node)))
     extension = os.path.splitext(filename)[1].lstrip('.')
@@ -43,6 +41,7 @@ def construct_include(loader: Loader, node: yaml.Node) -> Any:
 
 
 yaml.add_constructor('!include', construct_include, Loader)
+
 
 def get_info_all_cards(custom_repos):
     """Return all remote info if any."""
@@ -70,7 +69,7 @@ def get_info_all_cards(custom_repos):
 
 
 def init_local_data(base_dir, mode, custom_repos):
-    """Init new version file"""
+    """Init new version file."""
     remote = get_info_all_cards(custom_repos)
     local_cards = localcards(base_dir, mode)
     for card in remote:
@@ -128,7 +127,7 @@ def get_sensor_data(base_dir, mode, show_installable, custom_repos):
 
 def update_all(base_dir, mode, show_installable, custom_repos):
     """Update all cards."""
-    updates = get_sensor_data(base_dir, mode,show_installable,
+    updates = get_sensor_data(base_dir, mode, show_installable,
                               custom_repos)[0]['has_update']
     if updates is not None:
         LOGGER.info('update_all: "%s"', updates)
@@ -234,7 +233,7 @@ def local_data(base_dir, name=None, action='get', version=None):
 
 
 def storage_resources(base_dir):
-    """Load resources from storage"""
+    """Load resources from storage."""
     jsonfile = "{}/.storage/lovelace".format(base_dir)
     if os.path.isfile(jsonfile):
         with open(jsonfile) as localfile:
@@ -246,7 +245,7 @@ def storage_resources(base_dir):
 
 
 def yaml_resources(base_dir):
-    """Load resources from yaml"""
+    """Load resources from yaml."""
     yamlfile = "{}/ui-lovelace.yaml".format(base_dir)
     if os.path.isfile(yamlfile):
         with open(yamlfile) as localfile:
@@ -258,7 +257,7 @@ def yaml_resources(base_dir):
 
 
 def localcards(base_dir, mode):
-    """Return local cards"""
+    """Return local cards."""
     local_cards = []
     if mode == 'storage':
         for entry in storage_resources(base_dir):
