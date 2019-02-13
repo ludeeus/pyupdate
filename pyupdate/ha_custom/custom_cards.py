@@ -184,22 +184,22 @@ def get_card_dir(base_dir, name, mode):
     if mode == 'storage':
         for entry in storage_resources(base_dir):
             if name in entry['url']:
-                card_dir = name
+                card_dir = entry['url']
                 break
     else:
         for entry in yaml_resources(base_dir):
             if name in entry['url']:
-                card_dir = name
+                card_dir = entry['url']
                 break
 
     if card_dir is None:
         return None
 
     if '/customcards/' in card_dir:
-        card_dir.replace('/customcards/', '/www/')
+        card_dir = card_dir.replace('/customcards/', '/www/')
     if '/local/' in card_dir:
-        card_dir.replace('/local/', '/www/')
-    return card_dir
+        card_dir = card_dir.replace('/local/', '/www/')
+    return "{}{}".format(base_dir, card_dir).split(name)[0]
 
 
 def get_local_version(base_dir, name):
@@ -228,7 +228,7 @@ def local_data(base_dir, name=None, action='get', version=None):
         card['version'] = version
         load[name] = card
         with open(jsonfile, 'w') as outfile:
-            json.dump(load, outfile)
+            json.dump(load, outfile, indent=4)
     return returnvalue
 
 
