@@ -1,14 +1,50 @@
 """Logic to handle custom_cards."""
+import json
 import logging
 import os
+from typing import IO, Any
+
 import requests
 from requests import RequestException
+import yaml
 from pyupdate.ha_custom import common
 
 LOGGER = logging.getLogger(__name__)
 
 
-def get_info_all_cards(custom_repos=None):
+class Loader(yaml.SafeLoader):
+    """YAML Loader with `!include` constructor."""
+
+    def __init__(self, stream: IO) -> None:
+        """Initialise Loader."""
+
+        try:
+            self._root = os.path.split(stream.name)[0]
+        except AttributeError:
+            self._root = os.path.curdir
+
+        super().__init__(stream)
+
+
+def construct_include(loader: Loader, node: yaml.Node) -> Any:
+    """Include file referenced at node."""
+
+    filename = os.path.abspath(
+        os.path.join(loader._root, loader.construct_scalar(node)))
+    extension = os.path.splitext(filename)[1].lstrip('.')
+
+    with open(filename, 'r') as localfile:
+        if extension in ('yaml', 'yml'):
+            return yaml.load(localfile, Loader)
+        elif extension in ('json', ):
+            return json.load(localfile)
+        else:
+            return ''.join(localfile.readlines())
+
+
+yaml.add_constructor('!include', construct_include, Loader)
+
+def get_info_all_cards(custom_repos):
     """Return all remote info if any."""
     remote_info = {}
     for url in common.get_repo_data('card', custom_repos):
@@ -33,6 +69,18 @@ def get_info_all_cards(custom_repos=None):
     return remote_info
 
 
+def init_local_data(base_dir, mode, custom_repos):
+    """Init new version file"""
+    remote = get_info_all_cards(custom_repos)
+    local_cards = localcards(base_dir, mode)
+    for card in remote:
+        current = local_data(base_dir, card, 'get')
+        if 'version' not in current:
+            if card in local_cards:
+                LOGGER.debug("Setting initial version for %s", card)
+                local_data(base_dir, card, 'set')
+
+
 def get_lovelace_gen(base_dir):
     """Get lovelace-gen true if in use."""
     return_value = False
@@ -46,7 +94,7 @@ def get_lovelace_gen(base_dir):
     return return_value
 
 
-def get_sensor_data(base_dir, show_installable=False, custom_repos=None):
+def get_sensor_data(base_dir, mode, show_installable, custom_repos):
     """Get sensor data."""
     cards = get_info_all_cards(custom_repos)
     cahce_data = {}
@@ -59,7 +107,8 @@ def get_sensor_data(base_dir, show_installable=False, custom_repos=None):
             local_version = get_local_version(base_dir, name)
             has_update = (remote_version and
                           remote_version != local_version)
-            not_local = (remote_version and not local_version)
+            carddir = get_card_dir(base_dir, name, mode)
+            not_local = True if carddir is None else False
             if (not not_local and
                     remote_version) or (show_installable and remote_version):
                 if has_update and not not_local:
@@ -77,99 +126,145 @@ def get_sensor_data(base_dir, show_installable=False, custom_repos=None):
     return [cahce_data, count_updateable]
 
 
-def update_all(base_dir, show_installable=False, custom_repos=None):
+def update_all(base_dir, mode, show_installable, custom_repos):
     """Update all cards."""
-    updates = get_sensor_data(base_dir, show_installable,
+    updates = get_sensor_data(base_dir, mode,show_installable,
                               custom_repos)[0]['has_update']
     if updates is not None:
         LOGGER.info('update_all: "%s"', updates)
         for name in updates:
-            upgrade_single(base_dir, name, custom_repos)
+            upgrade_single(base_dir, name, mode, custom_repos)
     else:
         LOGGER.debug('update_all: No updates avaiable.')
 
 
-def upgrade_single(base_dir, name, custom_repos=None):
+def upgrade_single(base_dir, name, mode, custom_repos):
     """Update one card."""
     LOGGER.debug('upgrade_single started: "%s"', name)
     remote_info = get_info_all_cards(custom_repos)[name]
     remote_file = remote_info[2]
-    local_file = get_card_dir(base_dir, name) + name + '.js'
+    local_file = get_card_dir(base_dir, name, mode) + name + '.js'
     common.download_file(local_file, remote_file)
-    upgrade_lib(base_dir, name, custom_repos)
-    upgrade_editor(base_dir, name, custom_repos)
+    upgrade_lib(base_dir, name, mode, custom_repos)
+    upgrade_editor(base_dir, name, mode, custom_repos)
     update_resource_version(base_dir, name, custom_repos)
     LOGGER.info('upgrade_single finished: "%s"', name)
 
 
-def upgrade_lib(base_dir, name, custom_repos=None):
+def upgrade_lib(base_dir, name, mode, custom_repos):
     """Update one card-lib."""
     remote_info = get_info_all_cards(custom_repos)[name]
     remote_file = remote_info[2][:-3] + '.lib.js'
-    local_file = get_card_dir(base_dir, name) + name + '.lib.js'
+    local_file = get_card_dir(base_dir, name, mode) + name + '.lib.js'
     common.download_file(local_file, remote_file)
 
 
-def upgrade_editor(base_dir, name, custom_repos=None):
+def upgrade_editor(base_dir, name, mode, custom_repos):
     """Update one card-editor."""
     remote_info = get_info_all_cards(custom_repos)[name]
     remote_file = remote_info[2][:-3] + '-editor.js'
-    local_file = get_card_dir(base_dir, name) + name + '-editor.js'
+    local_file = get_card_dir(base_dir, name, mode) + name + '-editor.js'
     common.download_file(local_file, remote_file)
 
 
-def install(base_dir, name, custom_repos=None):
+def install(base_dir, name, mode, custom_repos):
     """Install single card."""
-    if name in get_sensor_data(base_dir, True, custom_repos)[0]:
-        upgrade_single(base_dir, name, custom_repos)
+    if name in get_sensor_data(base_dir, mode, True, custom_repos)[0]:
+        upgrade_single(base_dir, name, mode, custom_repos)
 
 
-def update_resource_version(base_dir, name, custom_repos=None):
+def update_resource_version(base_dir, name, custom_repos):
     """Update the ui-lovelace file."""
-    local_version = get_local_version(base_dir, name)
     remote_version = get_info_all_cards(custom_repos)[name][1]
-    conf_file = get_conf_file_path(base_dir)
-    common.replace_all(conf_file,
-                       name + '.js?v=' + str(local_version),
-                       name + '.js?v=' + str(remote_version))
+    local_data(base_dir, name, 'set', str(remote_version))
 
 
-def get_card_dir(base_dir, name):
+def get_card_dir(base_dir, name, mode):
     """Get card dir."""
-    conf_file = get_conf_file_path(base_dir)
-    with open(conf_file, 'r', errors='ignore') as local:
-        for line in local.readlines():
-            if '/' + name + '.js' in line:
-                card = line.split(': ')[1].split(name + '.js')
-                card_dir = base_dir + card[0].replace("local", "www")
+    card_dir = None
+    if mode == 'storage':
+        for entry in storage_resources(base_dir):
+            if name in entry['url']:
+                card_dir = name
                 break
-            else:
-                card_dir = base_dir + '/www/'
-    return card_dir
-
-
-def get_conf_file_path(base_dir):
-    """Get conf file."""
-    if get_lovelace_gen(base_dir):
-        return_value = os.path.join(base_dir, 'lovelace', 'main.yaml')
     else:
-        return_value = os.path.join(base_dir, 'ui-lovelace.yaml')
-    return return_value
+        for entry in yaml_resources(base_dir):
+            if name in entry['url']:
+                card_dir = name
+                break
+
+    if card_dir is None:
+        return None
+
+    if '/customcards/' in card_dir:
+        card_dir.replace('/customcards/', '/www/')
+    if '/local/' in card_dir:
+        card_dir.replace('/local/', '/www/')
+    return card_dir
 
 
 def get_local_version(base_dir, name):
     """Return the local version if any."""
-    return_value = None
-    card_config = ''
-    conf_file = get_conf_file_path(base_dir)
-    if os.path.isfile(conf_file):
-        with open(conf_file, 'r', errors='ignore') as local:
-            for line in local.readlines():
-                if '/' + name + '.js' in line:
-                    card_config = line
-                    break
-        local.close()
-        if '=' in card_config:
-            local_version = card_config.split('=')[1].split('\n')[0]
-            return_value = local_version
-    return return_value
+    version = local_data(base_dir, name, 'get').get('version')
+    return version
+
+
+def local_data(base_dir, name=None, action='get', version=None):
+    """Write or get info from storage."""
+    returnvalue = None
+    jsonfile = "{}/.storage/custom_updater.cards".format(base_dir)
+    if os.path.isfile(jsonfile):
+        with open(jsonfile) as storagefile:
+            load = json.load(storagefile)
+    else:
+        load = {}
+
+    if action == 'get':
+        if name is None:
+            returnvalue = load
+        else:
+            returnvalue = load.get(name, {})
+    else:
+        card = load.get(name, {})
+        card['version'] = version
+        load[name] = card
+        with open(jsonfile, 'w') as outfile:
+            json.dump(load, outfile)
+    return returnvalue
+
+
+def storage_resources(base_dir):
+    """Load resources from storage"""
+    jsonfile = "{}/.storage/lovelace".format(base_dir)
+    if os.path.isfile(jsonfile):
+        with open(jsonfile) as localfile:
+            load = json.load(localfile)
+            return load['data']['config'].get('resources', {})
+    else:
+        LOGGER.error("Lovelace config in .storage not found.")
+    return {}
+
+
+def yaml_resources(base_dir):
+    """Load resources from yaml"""
+    yamlfile = "{}/ui-lovelace.yaml".format(base_dir)
+    if os.path.isfile(yamlfile):
+        with open(yamlfile) as localfile:
+            load = yaml.load(localfile, Loader)
+            return load.get('resources', {})
+    else:
+        LOGGER.error("Lovelace config in yaml file not found.")
+    return {}
+
+
+def localcards(base_dir, mode):
+    """Return local cards"""
+    local_cards = []
+    if mode == 'storage':
+        for entry in storage_resources(base_dir):
+            local_cards.append(entry['url'].split('/')[1].split('.js')[0])
+    else:
+        for entry in yaml_resources(base_dir):
+            local_cards.append(entry['url'].split('/')[1].split('.js')[0])
+
+    return local_cards
