@@ -72,6 +72,7 @@ def init_local_data(base_dir, mode, custom_repos):
     """Init new version file."""
     remote = get_info_all_cards(custom_repos)
     local_cards = localcards(base_dir, mode)
+    LOGGER.debug("Local cards: %s", local_cards)
     for card in remote:
         current = local_data(base_dir, card, 'get')
         if 'version' not in current:
@@ -261,9 +262,9 @@ def localcards(base_dir, mode):
     local_cards = []
     if mode == 'storage':
         for entry in storage_resources(base_dir):
-            local_cards.append(entry['url'].split('/')[1].split('.js')[0])
+            local_cards.append(entry['url'].split('/')[-1].split('.js')[0])
     else:
         for entry in yaml_resources(base_dir):
-            local_cards.append(entry['url'].split('/')[1].split('.js')[0])
+            local_cards.append(entry['url'].split('/')[-1].split('.js')[0])
 
     return local_cards
