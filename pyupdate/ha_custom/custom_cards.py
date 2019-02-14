@@ -199,7 +199,7 @@ def get_card_dir(base_dir, name, mode):
         card_dir = card_dir.replace('/customcards/', '/www/')
     if '/local/' in card_dir:
         card_dir = card_dir.replace('/local/', '/www/')
-    return "{}{}".format(base_dir, card_dir).split(name)[0]
+    return "{}{}".format(base_dir, card_dir).split(name + '.js')[0]
 
 
 def get_local_version(base_dir, name):
