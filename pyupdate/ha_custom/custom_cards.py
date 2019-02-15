@@ -76,7 +76,7 @@ def init_local_data(base_dir, mode, custom_repos):
     for card in remote:
         current = local_data(base_dir, card, 'get')
         if 'version' not in current:
-            if card in local_cards:
+            if card == local_cards:
                 LOGGER.debug("Setting initial version for %s", card)
                 local_data(base_dir, card, 'set')
 
@@ -184,12 +184,18 @@ def get_card_dir(base_dir, name, mode):
     card_dir = None
     if mode == 'storage':
         for entry in storage_resources(base_dir):
-            if name in entry['url']:
+            if entry['url'][:4] == 'http':
+                break
+            entry_name = entry['url'].split('/')[-1].split('.js')[0]
+            if name == entry_name:
                 card_dir = entry['url']
                 break
     else:
         for entry in yaml_resources(base_dir):
-            if name in entry['url']:
+            if entry['url'][:4] == 'http':
+                break
+            entry_name = entry['url'].split('/')[-1].split('.js')[0]
+            if name == entry_name:
                 card_dir = entry['url']
                 break
 
@@ -262,9 +268,13 @@ def localcards(base_dir, mode):
     local_cards = []
     if mode == 'storage':
         for entry in storage_resources(base_dir):
+            if entry['url'][:4] == 'http':
+                break
             local_cards.append(entry['url'].split('/')[-1].split('.js')[0])
     else:
         for entry in yaml_resources(base_dir):
+            if entry['url'][:4] == 'http':
+                break
             local_cards.append(entry['url'].split('/')[-1].split('.js')[0])
 
     return local_cards
