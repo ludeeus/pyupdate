@@ -221,7 +221,11 @@ def local_data(base_dir, name=None, action='get', version=None):
     jsonfile = "{}/.storage/custom_updater.cards".format(base_dir)
     if os.path.isfile(jsonfile):
         with open(jsonfile) as storagefile:
-            load = json.load(storagefile)
+            try:
+                load = json.load(storagefile)
+            except Exception as error:
+                load = {}
+                LOGGER.error(error)
     else:
         load = {}
 
