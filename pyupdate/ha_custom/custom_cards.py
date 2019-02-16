@@ -223,7 +223,7 @@ def local_data(base_dir, name=None, action='get', version=None):
         with open(jsonfile) as storagefile:
             try:
                 load = json.load(storagefile)
-            except Exception as error:
+            except Exception as error:  # pylint: disable=W0703
                 load = {}
                 LOGGER.error(error)
     else:
