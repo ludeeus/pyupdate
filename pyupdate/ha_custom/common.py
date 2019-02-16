@@ -29,6 +29,9 @@ def get_repo_data(resource, extra_repos=None):
             repos.append(str(repo))
     if extra_repos is not None:
         for repo in extra_repos:
+            if repo[-3:] == '.js':
+                LOGGER.error("Custom URL should be json, not .js - '%s'", repo)
+                continue
             repos.append(str(repo))
     LOGGER.debug('get_repo_data: "%s"', repos)
     return repos
