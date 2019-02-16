@@ -185,7 +185,7 @@ def get_card_dir(base_dir, name, mode):
     if mode == 'storage':
         for entry in storage_resources(base_dir):
             if entry['url'][:4] == 'http':
-                break
+                continue
             entry_name = entry['url'].split('/')[-1].split('.js')[0]
             if name == entry_name:
                 card_dir = entry['url']
@@ -193,7 +193,7 @@ def get_card_dir(base_dir, name, mode):
     else:
         for entry in yaml_resources(base_dir):
             if entry['url'][:4] == 'http':
-                break
+                continue
             entry_name = entry['url'].split('/')[-1].split('.js')[0]
             if name == entry_name:
                 card_dir = entry['url']
