@@ -52,7 +52,9 @@ class CustomCards():
         self.mode = mode
         self.skip = skip
         self.repos = []
+        self.local_cards = []
         self.custom_repos = custom_repos
+        self.remote_info = {}
         self.initialize()
 
 
@@ -63,8 +65,10 @@ class CustomCards():
 
 
 
-    async def get_info_all_cards(self):
+    async def get_info_all_cards(self, force=False):
         """Return all remote info if any."""
+        if not force and self.remote_info is not None:
+            return self.remote_info
         remote_info = {}
         for url in common.get_repo_data('card', self.custom_repos):
             try:
@@ -85,10 +89,11 @@ class CustomCards():
             except RequestException:
                 print('Could not get remote info for ' + url)
         LOGGER.debug('get_info_all_cards: %s', remote_info)
+        self.remote_info = remote_info
         return remote_info
 
 
-    def init_local_data(self):
+    async def init_local_data(self):
         """Init new version file."""
         remote = self.get_info_all_cards()
         local_cards = self.localcards()
@@ -101,7 +106,7 @@ class CustomCards():
                     self.local_data(card, 'set')
 
 
-    def get_sensor_data(self):
+    async def get_sensor_data(self):
         """Get sensor data."""
         cards = self.get_info_all_cards()
         cahce_data = {}
@@ -143,7 +148,7 @@ class CustomCards():
             LOGGER.debug('update_all: No updates avaiable.')
 
 
-    def upgrade_single(self, name):
+    async def upgrade_single(self, name):
         """Update one card."""
         LOGGER.debug('upgrade_single started: "%s"', name)
         remote_info = self.get_info_all_cards()[name]
@@ -156,7 +161,7 @@ class CustomCards():
         LOGGER.info('upgrade_single finished: "%s"', name)
 
 
-    def upgrade_lib(self, name):
+    async def upgrade_lib(self, name):
         """Update one card-lib."""
         remote_info = self.get_info_all_cards()[name]
         remote_file = remote_info[2][:-3] + '.lib.js'
@@ -164,7 +169,7 @@ class CustomCards():
         common.download_file(local_file, remote_file)
 
 
-    def upgrade_editor(self, name):
+    async def upgrade_editor(self, name):
         """Update one card-editor."""
         remote_info = self.get_info_all_cards()[name]
         remote_file = remote_info[2][:-3] + '-editor.js'
@@ -172,37 +177,37 @@ class CustomCards():
         common.download_file(local_file, remote_file)
 
 
-    def install(self, name):
+    async def install(self, name):
         """Install single card."""
         if name in self.get_sensor_data()[0]:
             self.upgrade_single(name)
 
 
-    def update_resource_version(self, name):
+    async def update_resource_version(self, name):
         """Update the ui-lovelace file."""
         remote_version = self.get_info_all_cards()[name][1]
-        self.local_data(name, 'set', str(remote_version))
+        await self.local_data(name, 'set', version=str(remote_version))
 
 
-    def get_card_dir(self, name):
+    async def get_card_dir(self, name):
         """Get card dir."""
+        resources = {}
         card_dir = None
+        stored_dir = await self.local_data(name).get('dir', None)
+        if stored_dir is not None:
+            return stored_dir
+
         if self.mode == 'storage':
-            for entry in self.storage_resources():
-                if entry['url'][:4] == 'http':
-                    continue
-                entry_name = entry['url'].split('/')[-1].split('.js')[0]
-                if name == entry_name:
-                    card_dir = entry['url']
-                    break
+            resources = await self.storage_resources()
         else:
-            for entry in self.yaml_resources():
-                if entry['url'][:4] == 'http':
-                    continue
-                entry_name = entry['url'].split('/')[-1].split('.js')[0]
-                if name == entry_name:
-                    card_dir = entry['url']
-                    break
+            resources = await self.yaml_resources()
+        for entry in resources:
+            if entry['url'][:4] == 'http':
+                continue
+            entry_name = entry['url'].split('/')[-1].split('.js')[0]
+            if name == entry_name:
+                card_dir = entry['url']
+                break
 
         if card_dir is None:
             return None
@@ -211,16 +216,20 @@ class CustomCards():
             card_dir = card_dir.replace('/customcards/', '/www/')
         if '/local/' in card_dir:
             card_dir = card_dir.replace('/local/', '/www/')
-        return "{}{}".format(self.base_dir, card_dir).split(name + '.js')[0]
 
+        stored_dir = "{}{}".format(
+            self.base_dir, card_dir).split(name + '.js')[0]
+        await self.local_data(name, action='set', localdir=stored_dir)
+        return stored_dir
 
-    def get_local_version(self, name):
+    async def get_local_version(self, name):
         """Return the local version if any."""
-        version = self.local_data(name, 'get').get('version')
+        version = await self.local_data(name).get('version')
         return version
 
 
-    def local_data(self, name=None, action='get', version=None):
+    async def local_data(
+            self, name=None, action='get', version=None, localdir=None):
         """Write or get info from storage."""
         returnvalue = None
         jsonfile = "{}/.storage/custom_updater.cards".format(self.base_dir)
@@ -241,49 +250,53 @@ class CustomCards():
                 returnvalue = load.get(name, {})
         else:
             card = load.get(name, {})
-            card['version'] = version
+            if version is not None:
+                card['version'] = version
+            if localdir is not None:
+                card['dir'] = localdir
             load[name] = card
             with open(jsonfile, 'w') as outfile:
                 json.dump(load, outfile, indent=4)
+                outfile.close()
         return returnvalue
 
 
-    def storage_resources(self):
+    async def storage_resources(self):
         """Load resources from storage."""
+        resources = {}
         jsonfile = "{}/.storage/lovelace".format(self.base_dir)
         if os.path.isfile(jsonfile):
             with open(jsonfile) as localfile:
                 load = json.load(localfile)
-                return load['data']['config'].get('resources', {})
+                resources = load['data']['config'].get('resources', {})
+                load.close()
         else:
             LOGGER.error("Lovelace config in .storage not found.")
-        return {}
+        return resources
 
-
-    def yaml_resources(self):
+    async def yaml_resources(self):
         """Load resources from yaml."""
+        resources = {}
         yamlfile = "{}/ui-lovelace.yaml".format(self.base_dir)
         if os.path.isfile(yamlfile):
             with open(yamlfile) as localfile:
                 load = yaml.load(localfile, Loader)
-                return load.get('resources', {})
+                resources = load.get('resources', {})
+                load.close()
         else:
             LOGGER.error("Lovelace config in yaml file not found.")
-        return {}
+        return resources
 
-
-    def localcards(self):
+    async def localcards(self):
         """Return local cards."""
         local_cards = []
+        resources = {}
         if self.mode == 'storage':
-            for entry in self.storage_resources():
-                if entry['url'][:4] == 'http':
-                    break
-                local_cards.append(entry['url'].split('/')[-1].split('.js')[0])
+            resources = await self.storage_resources()
         else:
-            for entry in self.yaml_resources():
-                if entry['url'][:4] == 'http':
-                    break
-                local_cards.append(entry['url'].split('/')[-1].split('.js')[0])
-
-        return local_cards
+            resources = await self.yaml_resources()
+        for entry in resources:
+            if entry['url'][:4] == 'http':
+                continue
+            local_cards.append(entry['url'].split('/')[-1].split('.js')[0])
+        self.local_cards = local_cards
