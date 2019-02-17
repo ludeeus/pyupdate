@@ -23,7 +23,8 @@ class CustomComponents():
         if not force and self.remote_info:
             return self.remote_info
         remote_info = {}
-        for url in common.get_repo_data('component', self.custom_repos):
+        repos = await common.get_repo_data('component', self.custom_repos)
+        for url in repos:
             try:
                 response = requests.get(url)
                 if response.status_code == 200:
