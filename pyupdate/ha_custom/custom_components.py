@@ -45,6 +45,7 @@ class CustomComponents():
             except RequestException:
                 print('Could not get remote info for ' + url)
         LOGGER.debug('get_info_all_components: %s', remote_info)
+        self.remote_info = remote_info
         return remote_info
 
 
