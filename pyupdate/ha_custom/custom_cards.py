@@ -141,11 +141,13 @@ class CustomCards():
 
     async def update_all(self):
         """Update all cards."""
-        updates = await self.get_sensor_data()[0]['has_update']
+        updates = await self.get_sensor_data()
+        updates = updates[0]['has_update']
         if updates is not None:
             LOGGER.info('update_all: "%s"', updates)
             for name in updates:
                 await self.upgrade_single(name)
+            await self.get_info_all_cards(force=True)
         else:
             LOGGER.debug('update_all: No updates avaiable.')
 
@@ -153,7 +155,8 @@ class CustomCards():
     async def upgrade_single(self, name):
         """Update one card."""
         LOGGER.debug('upgrade_single started: "%s"', name)
-        remote_info = await self.get_info_all_cards()[name]
+        remote_info = await self.get_info_all_cards()
+        remote_info = remote_info[name]
         remote_file = remote_info[2]
         local_file = await self.get_card_dir(name) + name + '.js'
         await common.download_file(local_file, remote_file)
@@ -165,15 +168,17 @@ class CustomCards():
 
     async def upgrade_lib(self, name):
         """Update one card-lib."""
-        remote_info = await self.get_info_all_cards()[name]
+        remote_info = await self.get_info_all_cards()
+        remote_info = remote_info[name]
         remote_file = remote_info[2][:-3] + '.lib.js'
-        local_file = self.get_card_dir(name) + name + '.lib.js'
+        local_file = await self.get_card_dir(name) + name + '.lib.js'
         await common.download_file(local_file, remote_file)
 
 
     async def upgrade_editor(self, name):
         """Update one card-editor."""
-        remote_info = await self.get_info_all_cards()[name]
+        remote_info = await self.get_info_all_cards()
+        remote_info = remote_info[name]
         remote_file = remote_info[2][:-3] + '-editor.js'
         local_file = await self.get_card_dir(name) + name + '-editor.js'
         await common.download_file(local_file, remote_file)

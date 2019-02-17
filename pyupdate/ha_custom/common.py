@@ -71,10 +71,8 @@ async def download_file(local_file, remote_file):
 async def normalize_path(path):
     """Normalize the path."""
     path = path.replace('/', os.path.sep).replace('\\', os.path.sep)
-
     if path.startswith(os.path.sep):
         path = path[1:]
-
     return path
 
 
