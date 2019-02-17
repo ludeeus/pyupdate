@@ -89,6 +89,7 @@ class PythonScripts():
             LOGGER.info('update_all: "%s"', updates)
             for name in updates:
                 await self.upgrade_single(name)
+            await self.get_info_all_python_scripts(force=True)
         else:
             LOGGER.debug('update_all: No updates avaiable.')
 
