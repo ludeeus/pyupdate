@@ -23,7 +23,8 @@ async def get_default_repos():
 async def get_repo_data(resource, extra_repos=None):
     """Update the data about components."""
     repos = []
-    default_repos = await get_default_repos()[resource]
+    default_repos = await get_default_repos()
+    default_repos = default_repos[resource]
     if None not in default_repos:
         for repo in default_repos:
             repos.append(str(repo))
