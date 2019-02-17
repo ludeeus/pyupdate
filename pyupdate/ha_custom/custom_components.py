@@ -49,9 +49,9 @@ class CustomComponents():
         return remote_info
 
 
-    async def get_sensor_data(self):
+    async def get_sensor_data(self, force=False):
         """Get sensor data."""
-        components = await self.get_info_all_components()
+        components = await self.get_info_all_components(force)
         cahce_data = {}
         cahce_data['domain'] = 'custom_components'
         cahce_data['has_update'] = []
@@ -100,7 +100,7 @@ class CustomComponents():
         remote_info = remote_info[name]
         remote_file = remote_info[3]
         local_file = self.base_dir + '/' + str(remote_info[2])
-        common.download_file(local_file, remote_file)
+        await common.download_file(local_file, remote_file)
         await self.update_requirements(local_file)
         LOGGER.info('upgrade_single finished: "%s"', name)
 

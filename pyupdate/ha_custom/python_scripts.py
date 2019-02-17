@@ -50,9 +50,9 @@ class PythonScripts():
         return remote_info
 
 
-    async def get_sensor_data(self):
+    async def get_sensor_data(self, force=False):
         """Get sensor data."""
-        python_scripts = await self.get_info_all_python_scripts()
+        python_scripts = await self.get_info_all_python_scripts(force)
         cahce_data = {}
         cahce_data['domain'] = 'python_scripts'
         cahce_data['has_update'] = []

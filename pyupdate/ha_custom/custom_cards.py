@@ -107,10 +107,10 @@ class CustomCards():
                     self.local_data(card, 'set')
 
 
-    async def get_sensor_data(self):
+    async def get_sensor_data(self, force=False):
         """Get sensor data."""
         LOGGER.debug('get_sensor_data')
-        cards = await self.get_info_all_cards()
+        cards = await self.get_info_all_cards(force)
         LOGGER.debug(cards)
         cahce_data = {}
         cahce_data['domain'] = 'custom_cards'
