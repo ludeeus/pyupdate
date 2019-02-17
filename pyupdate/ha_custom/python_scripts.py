@@ -34,7 +34,7 @@ class PythonScripts():
                             py_script = [
                                 name,
                                 py_script['version'],
-                                common.normalize_path(
+                                await common.normalize_path(
                                     py_script['local_location']),
                                 py_script['remote_location'],
                                 py_script['visit_repo'],

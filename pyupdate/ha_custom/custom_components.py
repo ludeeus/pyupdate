@@ -33,7 +33,7 @@ class CustomComponents():
                             component = [
                                 name,
                                 component['version'],
-                                common.normalize_path(
+                                await common.normalize_path(
                                     component['local_location']),
                                 component['remote_location'],
                                 component['visit_repo'],
