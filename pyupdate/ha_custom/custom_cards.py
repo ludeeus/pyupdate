@@ -90,8 +90,8 @@ class CustomCards():
         remote = await self.get_info_all_cards()
         if not self.local_cards:
             await self.localcards()
-        version, path = None, None
         for card in remote:
+            version, path = None, None
             if card in self.local_cards:
                 current = await self.local_data(card, 'get')
                 if 'version' not in current.keys():
