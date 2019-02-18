@@ -115,9 +115,8 @@ class CustomCards():
                         msg.format("Setting initial version for " + card))
                     version = await self.get_remote_version(card)
 
-                if 'dir' not in current.keys():
-                    LOGGER.debug(msg.format("Setting initial path for " + card))
-                    path = await self.get_card_dir(card)
+                LOGGER.debug(msg.format("Setting path for " + card))
+                path = await self.get_card_dir(card, True)
 
                 await self.local_data(
                     name=card, action='set', version=version, localdir=path)
@@ -234,14 +233,15 @@ class CustomCards():
         await self.local_data(name, 'set', version=str(remote_version))
 
 
-    async def get_card_dir(self, name):
+    async def get_card_dir(self, name, force=False):
         """Get card dir."""
         msg = "get_card_dir: {}"
         resources = {}
         card_dir = None
         stored_dir = await self.local_data(name)
         stored_dir = stored_dir.get('dir', None)
-        if stored_dir is not None:
+        if stored_dir is not None and not force:
+            LOGGER.debug(msg.format('Using stored data'))
             return stored_dir
 
         if self.mode == 'storage':
