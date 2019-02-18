@@ -18,7 +18,6 @@ class PythonScripts():
         self.custom_repos = custom_repos
         self.remote_info = {}
 
-
     async def get_info_all_python_scripts(self, force=False):
         """Return all remote info if any."""
         if not force and self.remote_info:
