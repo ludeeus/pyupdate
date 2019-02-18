@@ -51,19 +51,9 @@ class CustomCards():
         self.base_dir = base_dir
         self.mode = mode
         self.skip = skip
-        self.repos = []
         self.local_cards = []
         self.custom_repos = custom_repos
         self.remote_info = None
-        self.initialize()
-
-    async def initialize(self):
-        """Extra initialition."""
-        msg = "initialize: {}"
-        LOGGER.debug(msg.format('Adding default repos'))
-        default_repo = await common.get_default_repos()
-        self.repos.append(default_repo)
-        LOGGER.debug(msg.format('Added ' + str(self.repos)))
 
     async def get_info_all_cards(self, force=False):
         """Return all remote info if any."""
