@@ -164,6 +164,7 @@ class CustomCards():
     async def force_reload(self):
         """Force data refresh."""
         await self.log.debug('force_reload', 'Started')
+        await self.localcards()
         await self.get_info_all_cards(True)
         await self.get_sensor_data()
 
@@ -349,7 +350,12 @@ class CustomCards():
         else:
             resources = await self.yaml_resources()
         for entry in resources:
-            if entry['url'][:4] == 'http':
+            try:
+                if entry['url'][:4] == 'http':
+                    continue
+            except Exception as error:
+                msg = "{} - {}".format(error, entry)
+                self.log.warning('localcards', msg)
                 continue
             local_cards.append(entry['url'].split('/')[-1].split('.js')[0])
         self.local_cards = local_cards
