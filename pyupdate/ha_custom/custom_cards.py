@@ -57,7 +57,6 @@ class CustomCards():
         self.remote_info = None
         self.initialize()
 
-
     async def initialize(self):
         """Extra initialition."""
         msg = "initialize: {}"
@@ -65,8 +64,6 @@ class CustomCards():
         default_repo = await common.get_default_repos()
         self.repos.append(default_repo)
         LOGGER.debug(msg.format('Added ' + str(self.repos)))
-
-
 
     async def get_info_all_cards(self, force=False):
         """Return all remote info if any."""
@@ -97,7 +94,6 @@ class CustomCards():
         self.remote_info = remote_info
         LOGGER.debug(msg.format('Updated stored data ' + str(remote_info)))
         return remote_info
-
 
     async def init_local_data(self):
         """Init new version file."""
@@ -159,7 +155,6 @@ class CustomCards():
         LOGGER.debug('get_sensor_data: [%s, %s]', cahce_data, count_updateable)
         return [cahce_data, count_updateable]
 
-
     async def update_all(self):
         """Update all cards."""
         msg = "update_all: {}"
@@ -173,15 +168,13 @@ class CustomCards():
         else:
             LOGGER.debug('update_all: No updates avaiable.')
 
-
     async def force_reload(self):
-        """Force data refresh"""
+        """Force data refresh."""
         msg = "force_reload: {}"
         LOGGER.debug(msg.format('Started'))
         await self.get_info_all_cards(True)
         await self.get_sensor_data()
         LOGGER.debug(msg.format('Done'))
-
 
     async def upgrade_single(self, name):
         """Update one card."""
@@ -197,7 +190,6 @@ class CustomCards():
         await self.update_resource_version(name)
         LOGGER.info(msg.format('Finished ' + name))
 
-
     async def upgrade_lib(self, name):
         """Update one card-lib."""
         msg = "upgrade_lib: {}"
@@ -206,7 +198,6 @@ class CustomCards():
         remote_file = remote_info['remote_location'][:-3] + '.lib.js'
         local_file = await self.get_card_dir(name) + name + '.lib.js'
         await common.download_file(local_file, remote_file)
-
 
     async def upgrade_editor(self, name):
         """Update one card-editor."""
@@ -217,13 +208,11 @@ class CustomCards():
         local_file = await self.get_card_dir(name) + name + '-editor.js'
         await common.download_file(local_file, remote_file)
 
-
     async def install(self, name):
         """Install single card."""
         msg = "install: {}"
         if name in await self.get_sensor_data()[0]:
             await self.upgrade_single(name)
-
 
     async def update_resource_version(self, name):
         """Update the ui-lovelace file."""
@@ -231,7 +220,6 @@ class CustomCards():
         remote_version = await self.get_info_all_cards()
         remote_version = remote_version[name]['version']
         await self.local_data(name, 'set', version=str(remote_version))
-
 
     async def get_card_dir(self, name, force=False):
         """Get card dir."""
@@ -286,7 +274,6 @@ class CustomCards():
         LOGGER.debug(msg.format(version))
         return version
 
-
     async def local_data(
             self, name=None, action='get', version=None, localdir=None):
         """Write or get info from storage."""
@@ -325,7 +312,6 @@ class CustomCards():
                 outfile.close()
         LOGGER.debug(msg.format(returnvalue))
         return returnvalue
-
 
     async def storage_resources(self):
         """Load resources from storage."""

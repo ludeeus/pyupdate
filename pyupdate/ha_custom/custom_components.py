@@ -48,7 +48,6 @@ class CustomComponents():
         self.remote_info = remote_info
         return remote_info
 
-
     async def get_sensor_data(self, force=False):
         """Get sensor data."""
         components = await self.get_info_all_components(force)
@@ -79,7 +78,6 @@ class CustomComponents():
         LOGGER.debug('get_sensor_data: [%s, %s]', cahce_data, count_updateable)
         return [cahce_data, count_updateable]
 
-
     async def update_all(self):
         """Update all components."""
         updates = await self.get_sensor_data()
@@ -92,7 +90,6 @@ class CustomComponents():
         else:
             LOGGER.debug('update_all: No updates avaiable.')
 
-
     async def upgrade_single(self, name):
         """Update one component."""
         LOGGER.debug('upgrade_single started: "%s"', name)
@@ -103,7 +100,6 @@ class CustomComponents():
         await common.download_file(local_file, remote_file)
         await self.update_requirements(local_file)
         LOGGER.info('upgrade_single finished: "%s"', name)
-
 
     async def install(self, name):
         """Install single component."""
@@ -116,19 +112,18 @@ class CustomComponents():
                     os.mkdir(path)
             await self.upgrade_single(name)
 
-
     async def get_local_version(self, path):
         """Return the local version if any."""
         return_value = ''
         if os.path.isfile(path):
             with open(path, 'r') as local:
-                ret = re.compile(r"^\b(VERSION|__version__)\s*=\s*['\"](.*)['\"]")
+                ret = re.compile(
+                    r"^\b(VERSION|__version__)\s*=\s*['\"](.*)['\"]")
                 for line in local.readlines():
                     matcher = ret.match(line)
                     if matcher:
                         return_value = str(matcher.group(2))
         return return_value
-
 
     async def update_requirements(self, path):
         """Update the requirements for a python file."""

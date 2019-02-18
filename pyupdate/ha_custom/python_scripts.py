@@ -49,7 +49,6 @@ class PythonScripts():
         self.remote_info = remote_info
         return remote_info
 
-
     async def get_sensor_data(self, force=False):
         """Get sensor data."""
         python_scripts = await self.get_info_all_python_scripts(force)
@@ -80,7 +79,6 @@ class PythonScripts():
         LOGGER.debug('get_sensor_data: [%s, %s]', cahce_data, count_updateable)
         return [cahce_data, count_updateable]
 
-
     async def update_all(self):
         """Update all python_script."""
         updates = await self.get_sensor_data()
@@ -93,7 +91,6 @@ class PythonScripts():
         else:
             LOGGER.debug('update_all: No updates avaiable.')
 
-
     async def upgrade_single(self, name):
         """Update one python_script."""
         LOGGER.debug('upgrade_single started: "%s"', name)
@@ -104,13 +101,11 @@ class PythonScripts():
         await common.download_file(local_file, remote_file)
         LOGGER.info('upgrade_single finished: "%s"', name)
 
-
     async def install(self, name):
         """Install single python_script."""
         sdata = await self.get_sensor_data()
         if name in sdata[0]:
             await self.upgrade_single(name)
-
 
     async def get_local_version(self, path):
         """Return the local version if any."""
