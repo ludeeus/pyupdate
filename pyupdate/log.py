@@ -10,10 +10,6 @@ class Logger():
         self.logger = logging.getLogger(__name__)
         self._class = classname
 
-    async def log(self, method, message):
-        """Common logger method."""
-        await self.debug(method, message)
-
     async def debug(self, method, message):
         """Debug logger method."""
         msg = "{}({}) - {}".format(self._class, str(method), str(message))
