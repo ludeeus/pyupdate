@@ -11,7 +11,7 @@ class Logger():
         self._class = classname
 
     async def log(self, method, message):
-        """Default logger method."""
+        """Common logger method."""
         await self.debug(method, message)
 
     async def debug(self, method, message):
