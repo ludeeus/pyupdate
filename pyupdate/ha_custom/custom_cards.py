@@ -193,6 +193,7 @@ class CustomCards():
     async def upgrade_lib(self, name):
         """Update one card-lib."""
         msg = "upgrade_lib: {}"
+        LOGGER.debug(msg.format('Started'))
         remote_info = await self.get_info_all_cards()
         remote_info = remote_info[name]
         remote_file = remote_info['remote_location'][:-3] + '.lib.js'
@@ -202,6 +203,7 @@ class CustomCards():
     async def upgrade_editor(self, name):
         """Update one card-editor."""
         msg = "upgrade_editor: {}"
+        LOGGER.debug(msg.format('Started'))
         remote_info = await self.get_info_all_cards()
         remote_info = remote_info[name]
         remote_file = remote_info['remote_location'][:-3] + '-editor.js'
@@ -211,12 +213,14 @@ class CustomCards():
     async def install(self, name):
         """Install single card."""
         msg = "install: {}"
+        LOGGER.debug(msg.format('Started'))
         if name in await self.get_sensor_data()[0]:
             await self.upgrade_single(name)
 
     async def update_resource_version(self, name):
         """Update the ui-lovelace file."""
         msg = "update_resource_version: {}"
+        LOGGER.debug(msg.format('Started'))
         remote_version = await self.get_info_all_cards()
         remote_version = remote_version[name]['version']
         await self.local_data(name, 'set', version=str(remote_version))
