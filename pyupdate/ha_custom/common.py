@@ -1,12 +1,12 @@
 """Logic to handle common functions."""
 import os
 import fileinput
-import logging
 import subprocess
 import sys
 import requests
+from pyupdate.log import Logger
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = Logger('Common')
 
 
 async def get_default_repos():
@@ -31,10 +31,12 @@ async def get_repo_data(resource, extra_repos=None):
     if extra_repos is not None:
         for repo in extra_repos:
             if repo[-3:] == '.js':
-                LOGGER.error("Custom URL should be json, not .js - '%s'", repo)
+                await LOGGER.warning(
+                    'get_repo_data',
+                    "Custom URL should be json, not .js - '{}'".format(repo))
                 continue
             repos.append(str(repo))
-    LOGGER.debug('get_repo_data: "%s"', repos)
+    await LOGGER.debug('get_repo_data', repos)
     return repos
 
 
@@ -52,7 +54,9 @@ async def check_remote_access(file):
 
 async def download_file(local_file, remote_file):
     """Download a file."""
-    LOGGER.debug("Downloading '%s' to '%s'", remote_file, local_file)
+    await LOGGER.debug(
+        'download_file',
+        "Downloading '{}' to '{}'".format(remote_file, local_file))
     if await check_local_premissions(local_file):
         if await check_remote_access(remote_file):
             with open(local_file, 'wb') as file:
@@ -60,10 +64,14 @@ async def download_file(local_file, remote_file):
             file.close()
             retrun_value = True
         else:
-            print('Remote file not accessable.')
+            await LOGGER.debug(
+                'download_file',
+                'Remote file not accessable. "{}"'.format(remote_file))
             retrun_value = False
     else:
-        print('local file not writable.')
+        await LOGGER.debug(
+            'download_file',
+            'Local file not accessable. "{}"'.format(local_file))
         retrun_value = False
     return retrun_value
 
@@ -78,8 +86,10 @@ async def normalize_path(path):
 
 async def replace_all(file, search, replace):
     """Replace all occupancies of search in file."""
-    LOGGER.debug('Replacing all "%s" with "%s" in file "%s"', search,
-                 replace, file)
+    await LOGGER.debug(
+        'replace_all',
+        "Replacing all '{}' with '{}' in file '{}'".format(
+            search, replace, file))
     for line in fileinput.input(file, inplace=True):
         if search in line:
             line = line.replace(search, replace)
@@ -88,5 +98,6 @@ async def replace_all(file, search, replace):
 
 async def update(package):
     """Update a pip package."""
+    await LOGGER.debug('update', 'Starting upgrade of {}'.format(package))
     await subprocess.call(
         [sys.executable, "-m", "pip", "install", "--upgrade", package])

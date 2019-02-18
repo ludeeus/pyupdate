@@ -1,6 +1,5 @@
 """Logic to handle custom_cards."""
 import json
-import logging
 import os
 from typing import IO, Any
 
@@ -8,8 +7,7 @@ import requests
 from requests import RequestException
 import yaml
 from pyupdate.ha_custom import common
-
-LOGGER = logging.getLogger(__name__)
+from pyupdate.log import Logger
 
 
 class Loader(yaml.SafeLoader):
@@ -51,16 +49,16 @@ class CustomCards():
         self.base_dir = base_dir
         self.mode = mode
         self.skip = skip
+        self.log = Logger('CustomCards')
         self.local_cards = []
         self.custom_repos = custom_repos
         self.remote_info = None
 
     async def get_info_all_cards(self, force=False):
         """Return all remote info if any."""
-        msg = "get_info_all_cards: {}"
-        LOGGER.debug(msg.format('Started'))
+        await self.log.debug('get_info_all_cards', 'Started')
         if not force and self.remote_info is not None:
-            LOGGER.debug(msg.format('Using stored data'))
+            await self.log.debug('get_info_all_cards', 'Using stored data')
             return self.remote_info
         remote_info = {}
         repos = await common.get_repo_data('card', self.custom_repos)
@@ -82,13 +80,13 @@ class CustomCards():
             except RequestException:
                 print('Could not get remote info for ' + url)
         self.remote_info = remote_info
-        LOGGER.debug(msg.format('Updated stored data ' + str(remote_info)))
+        await self.log.debug(
+            'get_info_all_cards', 'Updated stored data ' + str(remote_info))
         return remote_info
 
     async def init_local_data(self):
         """Init new version file."""
-        msg = "init_local_data: {}"
-        LOGGER.debug(msg.format('Started'))
+        await self.log.debug('init_local_data', 'Started')
         remote = await self.get_info_all_cards()
         if not self.local_cards:
             await self.localcards()
@@ -97,11 +95,12 @@ class CustomCards():
             if card in self.local_cards:
                 current = await self.local_data(card, 'get')
                 if 'version' not in current.keys():
-                    LOGGER.debug(
-                        msg.format("Setting initial version for " + card))
+                    await self.log.debug(
+                        'init_local_data',
+                        'Setting initial version for {}'.format(card))
                     version = await self.get_remote_version(card)
-
-                LOGGER.debug(msg.format("Setting path for " + card))
+                await self.log.debug(
+                    'init_local_data', 'Setting path for {}'.format(card))
                 path = await self.get_card_dir(card, True)
 
                 await self.local_data(
@@ -109,12 +108,14 @@ class CustomCards():
 
     async def get_sensor_data(self):
         """Get sensor data."""
-        msg = "get_sensor_data: {}"
+        await self.log.debug('get_sensor_data', 'Started')
         if not self.local_cards:
             await self.localcards()
         cards = await self.get_info_all_cards()
-        LOGGER.debug(msg.format('Number of cards: ' + str(len(cards.keys()))))
-        LOGGER.debug(msg.format('Cards: ' + str(cards.keys())))
+        await self.log.debug(
+            'get_sensor_data', 'Number of cards: ' + str(len(cards.keys())))
+        await self.log.debug(
+            'get_sensor_data', 'Cards: ' + str(cards.keys()))
         cahce_data = {}
         cahce_data['domain'] = 'custom_cards'
         cahce_data['has_update'] = []
@@ -142,34 +143,33 @@ class CustomCards():
                         "repo": cards[card]['visit_repo'],
                         "change_log": cards[card]['changelog'],
                     }
-        LOGGER.debug('get_sensor_data: [%s, %s]', cahce_data, count_updateable)
+        await self.log.debug(
+            'get_sensor_data',
+            'get_sensor_data: [{}, {}]'.format(cahce_data, count_updateable))
         return [cahce_data, count_updateable]
 
     async def update_all(self):
         """Update all cards."""
-        msg = "update_all: {}"
+        await self.log.debug('update_all', 'Started')
         updates = await self.get_sensor_data()
         updates = updates[0]['has_update']
         if updates is not None:
-            LOGGER.info(msg.format(updates))
+            await self.log.info('update_all', updates)
             for name in updates:
                 await self.upgrade_single(name)
             await self.get_info_all_cards(force=True)
         else:
-            LOGGER.debug('update_all: No updates avaiable.')
+            await self.log.info('update_all', 'No updates avaiable')
 
     async def force_reload(self):
         """Force data refresh."""
-        msg = "force_reload: {}"
-        LOGGER.debug(msg.format('Started'))
+        await self.log.debug('force_reload', 'Started')
         await self.get_info_all_cards(True)
         await self.get_sensor_data()
-        LOGGER.debug(msg.format('Done'))
 
     async def upgrade_single(self, name):
         """Update one card."""
-        msg = "upgrade_single: {}"
-        LOGGER.info(msg.format('Started ' + name))
+        await self.log.info('upgrade_single', 'Started')
         remote_info = await self.get_info_all_cards()
         remote_info = remote_info[name]
         remote_file = remote_info['remote_location']
@@ -178,12 +178,11 @@ class CustomCards():
         await self.upgrade_lib(name)
         await self.upgrade_editor(name)
         await self.update_resource_version(name)
-        LOGGER.info(msg.format('Finished ' + name))
+        await self.log.info('upgrade_single', 'Finished ' + name)
 
     async def upgrade_lib(self, name):
         """Update one card-lib."""
-        msg = "upgrade_lib: {}"
-        LOGGER.debug(msg.format('Started'))
+        await self.log.debug('upgrade_lib', 'Started')
         remote_info = await self.get_info_all_cards()
         remote_info = remote_info[name]
         remote_file = remote_info['remote_location'][:-3] + '.lib.js'
@@ -192,8 +191,7 @@ class CustomCards():
 
     async def upgrade_editor(self, name):
         """Update one card-editor."""
-        msg = "upgrade_editor: {}"
-        LOGGER.debug(msg.format('Started'))
+        await self.log.debug('upgrade_editor', 'Started')
         remote_info = await self.get_info_all_cards()
         remote_info = remote_info[name]
         remote_file = remote_info['remote_location'][:-3] + '-editor.js'
@@ -202,28 +200,27 @@ class CustomCards():
 
     async def install(self, name):
         """Install single card."""
-        msg = "install: {}"
-        LOGGER.debug(msg.format('Started'))
+        await self.log.debug('install', 'Started')
         if name in await self.get_sensor_data()[0]:
             await self.upgrade_single(name)
 
     async def update_resource_version(self, name):
         """Update the ui-lovelace file."""
-        msg = "update_resource_version: {}"
-        LOGGER.debug(msg.format('Started'))
+        await self.log.debug('update_resource_version', 'Started')
         remote_version = await self.get_info_all_cards()
         remote_version = remote_version[name]['version']
         await self.local_data(name, 'set', version=str(remote_version))
 
     async def get_card_dir(self, name, force=False):
         """Get card dir."""
-        msg = "get_card_dir: {}"
+        await self.log.debug('get_card_dir', 'Started')
         resources = {}
         card_dir = None
         stored_dir = await self.local_data(name)
         stored_dir = stored_dir.get('dir', None)
         if stored_dir is not None and not force:
-            LOGGER.debug(msg.format('Using stored data'))
+            await self.log.debug(
+                'get_card_dir', 'Using stored data for {}'.format(name))
             return stored_dir
 
         if self.mode == 'storage':
@@ -249,34 +246,34 @@ class CustomCards():
         stored_dir = "{}{}".format(
             self.base_dir, card_dir).split(name + '.js')[0]
         await self.local_data(name, action='set', localdir=stored_dir)
-        LOGGER.debug(msg.format(stored_dir))
+        await self.log.debug('get_card_dir', stored_dir)
         return stored_dir
 
     async def get_local_version(self, name):
         """Return the local version if any."""
-        msg = "get_local_version: {}"
+        await self.log.debug('get_local_version', 'Started')
         version = await self.local_data(name)
         version = version.get('version')
-        LOGGER.debug(msg.format(version))
+        await self.log.debug('get_local_version', version)
         return version
 
     async def get_remote_version(self, name):
         """Return the remote version if any."""
-        msg = "get_remote_version: {}"
+        await self.log.debug('get_remote_version', 'Started')
         version = await self.get_info_all_cards()
         version = version.get(name, {}).get('version')
-        LOGGER.debug(msg.format(version))
+        await self.log.debug('get_remote_version', version)
         return version
 
     async def local_data(
             self, name=None, action='get', version=None, localdir=None):
         """Write or get info from storage."""
-        msg = "local_data: {}"
+        await self.log.debug('local_data', 'Started')
         data = {'action': action,
                 'name': name,
                 'version': version,
                 'dir': localdir}
-        LOGGER.debug(msg.format(data))
+        await self.log.debug('local_data', data)
         returnvalue = None
         jsonfile = "{}/.storage/custom_updater.cards".format(self.base_dir)
         if os.path.isfile(jsonfile):
@@ -285,7 +282,7 @@ class CustomCards():
                     load = json.load(storagefile)
                 except Exception as error:  # pylint: disable=W0703
                     load = {}
-                    LOGGER.error(error)
+                    await self.log.error('local_data', error)
         else:
             load = {}
 
@@ -304,12 +301,12 @@ class CustomCards():
             with open(jsonfile, 'w') as outfile:
                 json.dump(load, outfile, indent=4)
                 outfile.close()
-        LOGGER.debug(msg.format(returnvalue))
+        await self.log.debug('local_data', returnvalue)
         return returnvalue
 
     async def storage_resources(self):
         """Load resources from storage."""
-        msg = "storage_resources: {}"
+        await self.log.debug('storage_resources', 'Started')
         resources = {}
         jsonfile = "{}/.storage/lovelace".format(self.base_dir)
         if os.path.isfile(jsonfile):
@@ -318,13 +315,15 @@ class CustomCards():
                 resources = load['data']['config'].get('resources', {})
                 localfile.close()
         else:
-            LOGGER.error("Lovelace config in .storage not found.")
-        LOGGER.debug(msg.format(resources))
+            await self.log.error(
+                'storage_resources',
+                'Lovelace config in .storage file not found')
+        await self.log.debug('storage_resources', resources)
         return resources
 
     async def yaml_resources(self):
         """Load resources from yaml."""
-        msg = "yaml_resources: {}"
+        await self.log.debug('yaml_resources', 'Started')
         resources = {}
         yamlfile = "{}/ui-lovelace.yaml".format(self.base_dir)
         if os.path.isfile(yamlfile):
@@ -333,14 +332,16 @@ class CustomCards():
                 resources = load.get('resources', {})
                 localfile.close()
         else:
-            LOGGER.error("Lovelace config in yaml file not found.")
-        LOGGER.debug(msg.format(resources))
+            await self.log.error(
+                'yaml_resources', 'Lovelace config in yaml file not found')
+        await self.log.debug('yaml_resources', resources)
         return resources
 
     async def localcards(self):
         """Return local cards."""
-        msg = "localcards: {}"
-        LOGGER.debug(msg.format('Getting local cards with mode: ' + self.mode))
+        await self.log.debug('localcards', 'Started')
+        await self.log.debug(
+            'localcards', 'Getting local cards with mode: ' + self.mode)
         local_cards = []
         resources = {}
         if self.mode == 'storage':
@@ -352,4 +353,4 @@ class CustomCards():
                 continue
             local_cards.append(entry['url'].split('/')[-1].split('.js')[0])
         self.local_cards = local_cards
-        LOGGER.debug(msg.format(str(self.local_cards)))
+        await self.log.debug('localcards', self.local_cards)
