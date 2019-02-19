@@ -49,8 +49,9 @@ class CustomCards():
         self.base_dir = base_dir
         self.mode = mode
         self.skip = skip
-        self.log = Logger(self.__class__.__name__)
+        self.log = Logger('CustomCards')
         self.local_cards = []
+        self.super_custom_url = []
         self.custom_repos = custom_repos
         self.remote_info = None
 
@@ -61,7 +62,12 @@ class CustomCards():
             await self.log.debug('get_info_all_cards', 'Using stored data')
             return self.remote_info
         remote_info = {}
-        repos = await common.get_repo_data('card', self.custom_repos)
+        allcustom = []
+        for url in self.custom_repos:
+            allcustom.append(url)
+        for url in self.super_custom_url:
+            allcustom.append(url)
+        repos = await common.get_repo_data('card', allcustom)
         for url in repos:
             try:
                 response = requests.get(url)
@@ -87,9 +93,15 @@ class CustomCards():
     async def init_local_data(self):
         """Init new version file."""
         await self.log.debug('init_local_data', 'Started')
-        remote = await self.get_info_all_cards()
         if not self.local_cards:
             await self.localcards()
+        remote = await self.get_info_all_cards()
+        for url in self.super_custom_url:
+            card_dir = url.split('.com/')[1].split('/master')[0]
+            card = card_dir.split('/')[1]
+            card_dir = "{}/www/github/{}".format(self.base_dir, card_dir)
+            if not os.path.exists("{}/{}.js".format(card_dir, card)):
+                await self.upgrade_single(card)
         for card in remote:
             version, path = None, None
             if card in self.local_cards:
@@ -164,6 +176,7 @@ class CustomCards():
     async def force_reload(self):
         """Force data refresh."""
         await self.log.debug('force_reload', 'Started')
+        await self.localcards()
         await self.get_info_all_cards(True)
         await self.get_sensor_data()
 
@@ -201,7 +214,8 @@ class CustomCards():
     async def install(self, name):
         """Install single card."""
         await self.log.debug('install', 'Started')
-        if name in await self.get_sensor_data()[0]:
+        sdata = await self.get_sensor_data()
+        if name in sdata[0]:
             await self.upgrade_single(name)
 
     async def update_resource_version(self, name):
@@ -347,14 +361,28 @@ class CustomCards():
         await self.log.debug(
             'localcards', 'Getting local cards with mode: ' + self.mode)
         local_cards = []
+        super_custom_url = []
         resources = {}
         if self.mode == 'storage':
             resources = await self.storage_resources()
         else:
             resources = await self.yaml_resources()
         for entry in resources:
-            if entry['url'][:4] == 'http':
+            url = entry['url']
+            if '?track=false' in url or '?track=False' in url:
                 continue
-            local_cards.append(entry['url'].split('/')[-1].split('.js')[0])
+            if url[:4] == 'http':
+                continue
+            if '/customcards/github' in url and ('?track=true' in url or '?track=True' in url):
+                base = "https://raw.githubusercontent.com/{}/{}/master/custom_card.json"
+                clean = url.split('/customcards/github/')[1].split('.js')[0]
+                dev = clean.split('/')[0]
+                card = clean.split('/')[1]
+                super_custom_url.append(base.format(dev, card))
+                card_dir = self.base_dir + "/www/github/" + dev
+                os.makedirs(card_dir, exist_ok=True)
+            local_cards.append(url.split('/')[-1].split('.js')[0])
+        self.super_custom_url = super_custom_url
         self.local_cards = local_cards
         await self.log.debug('localcards', self.local_cards)
+        await self.log.debug('localcards', self.super_custom_url)
