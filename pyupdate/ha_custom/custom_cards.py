@@ -371,14 +371,30 @@ class CustomCards():
                 continue
             if '/customcards/github' in url and (
                     '?track=true' in url or '?track=True' in url):
+                remote_exist = False
                 base = "https://raw.githubusercontent.com/"
-                base = base + "{}/{}/master/custom_card.json"
                 clean = url.split('/customcards/github/')[1].split('.js')[0]
                 dev = clean.split('/')[0]
                 card = clean.split('/')[1]
-                super_custom_url.append(base.format(dev, card))
-                card_dir = self.base_dir + "/www/github/" + dev
-                os.makedirs(card_dir, exist_ok=True)
+                base = base + "{}/{}/master/".format(dev, card)
+                if await common.check_remote_access(base + 'custom_card.json'):
+                    remote_exist = True
+                    base = base + 'custom_card.json'
+                elif await common.check_remote_access(base + 'tracker.json'):
+                    remote_exist = True
+                    base = base + 'tracker.json'
+                elif await common.check_remote_access(base + 'updater.json'):
+                    remote_exist = True
+                    base = base + 'updater.json'
+                elif await common.check_remote_access(
+                        base + 'custom_updater.json'):
+                    remote_exist = True
+                    base = base + 'custom_updater.json'
+
+                if remote_exist:
+                    super_custom_url.append(base)
+                    card_dir = self.base_dir + "/www/github/" + dev
+                    os.makedirs(card_dir, exist_ok=True)
             local_cards.append(url.split('/')[-1].split('.js')[0])
         self.super_custom_url = super_custom_url
         self.local_cards = local_cards
@@ -388,6 +404,10 @@ class CustomCards():
     async def super_custom(self):
         """Super custom stuff."""
         for url in self.super_custom_url:
+            response = requests.get(url)
+            if response.status_code == 200:
+                if len(response.json()) != 1:
+                    continue
             card_dir = url.split('.com/')[1].split('/master')[0]
             card = card_dir.split('/')[1]
             card_dir = "{}/www/github/{}".format(self.base_dir, card_dir)
