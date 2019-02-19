@@ -391,7 +391,8 @@ class CustomCards():
                         base + 'custom_updater.json'):
                     remote_exist = True
                     base = base + 'custom_updater.json'
-
+                elif self.remote_info is not None and card in self.remote_info:
+                    remote_exist = True
                 if remote_exist:
                     super_custom_url.append(base)
                     card_dir = self.base_dir + "/www/github/" + dev
