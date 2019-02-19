@@ -49,7 +49,7 @@ class CustomCards():
         self.base_dir = base_dir
         self.mode = mode
         self.skip = skip
-        self.log = Logger('CustomCards')
+        self.log = Logger(self.__class__.__name__)
         self.local_cards = []
         self.super_custom_url = []
         self.custom_repos = custom_repos
