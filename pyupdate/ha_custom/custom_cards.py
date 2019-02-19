@@ -277,8 +277,8 @@ class CustomCards():
         returnvalue = None
         jsonfile = "{}/.storage/custom_updater.cards".format(self.base_dir)
         if os.path.isfile(jsonfile):
-            with open(
-                jsonfile, encoding='utf-8', errors='ignore') as storagefile:
+            with open(jsonfile, encoding='utf-8',
+                      errors='ignore') as storagefile:
                 try:
                     load = json.load(storagefile)
                 except Exception as error:  # pylint: disable=W0703
@@ -299,8 +299,8 @@ class CustomCards():
             if localdir is not None:
                 card['dir'] = localdir
             load[name] = card
-            with open(
-                jsonfile, 'w', encoding='utf-8', errors='ignore') as outfile:
+            with open(jsonfile, 'w', encoding='utf-8',
+                      errors='ignore') as outfile:
                 json.dump(load, outfile, indent=4)
                 outfile.close()
         await self.log.debug('local_data', returnvalue)
@@ -312,7 +312,8 @@ class CustomCards():
         resources = {}
         jsonfile = "{}/.storage/lovelace".format(self.base_dir)
         if os.path.isfile(jsonfile):
-            with open(jsonfile, encoding='utf-8', errors='ignore') as localfile:
+            with open(jsonfile, encoding='utf-8',
+                      errors='ignore') as localfile:
                 load = json.load(localfile)
                 resources = load['data']['config'].get('resources', {})
                 localfile.close()
@@ -329,7 +330,8 @@ class CustomCards():
         resources = {}
         yamlfile = "{}/ui-lovelace.yaml".format(self.base_dir)
         if os.path.isfile(yamlfile):
-            with open(yamlfile, encoding='utf-8', errors='ignore') as localfile:
+            with open(yamlfile, encoding='utf-8',
+                      errors='ignore') as localfile:
                 load = yaml.load(localfile, Loader)
                 resources = load.get('resources', {})
                 localfile.close()
