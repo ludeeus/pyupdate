@@ -373,8 +373,10 @@ class CustomCards():
                 continue
             if url[:4] == 'http':
                 continue
-            if '/customcards/github' in url and ('?track=true' in url or '?track=True' in url):
-                base = "https://raw.githubusercontent.com/{}/{}/master/custom_card.json"
+            if '/customcards/github' in url and (
+                    '?track=true' in url or '?track=True' in url):
+                base = "https://raw.githubusercontent.com/"
+                base = base + "{}/{}/master/custom_card.json"
                 clean = url.split('/customcards/github/')[1].split('.js')[0]
                 dev = clean.split('/')[0]
                 card = clean.split('/')[1]
