@@ -96,12 +96,7 @@ class CustomCards():
         if not self.local_cards:
             await self.localcards()
         remote = await self.get_info_all_cards()
-        for url in self.super_custom_url:
-            card_dir = url.split('.com/')[1].split('/master')[0]
-            card = card_dir.split('/')[1]
-            card_dir = "{}/www/github/{}".format(self.base_dir, card_dir)
-            if not os.path.exists("{}/{}.js".format(card_dir, card)):
-                await self.upgrade_single(card)
+        await self.super_custom()
         for card in remote:
             version, path = None, None
             if card in self.local_cards:
@@ -178,6 +173,7 @@ class CustomCards():
         await self.log.debug('force_reload', 'Started')
         await self.localcards()
         await self.get_info_all_cards(True)
+        await self.super_custom()
         await self.get_sensor_data()
 
     async def upgrade_single(self, name):
@@ -388,3 +384,12 @@ class CustomCards():
         self.local_cards = local_cards
         await self.log.debug('localcards', self.local_cards)
         await self.log.debug('localcards', self.super_custom_url)
+
+    async def super_custom(self):
+        """Super custom stuff."""
+        for url in self.super_custom_url:
+            card_dir = url.split('.com/')[1].split('/master')[0]
+            card = card_dir.split('/')[1]
+            card_dir = "{}/www/github/{}".format(self.base_dir, card_dir)
+            if not os.path.exists("{}/{}.js".format(card_dir, card)):
+                await self.upgrade_single(card)
