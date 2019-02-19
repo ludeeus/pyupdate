@@ -29,7 +29,7 @@ def construct_include(loader: Loader, node: yaml.Node) -> Any:
         os.path.join(loader._root, loader.construct_scalar(node)))
     extension = os.path.splitext(filename)[1].lstrip('.')
 
-    with open(filename, 'r') as localfile:
+    with open(filename, 'r', encoding='utf-8', errors='ignore') as localfile:
         if extension in ('yaml', 'yml'):
             return yaml.load(localfile, Loader)
         elif extension in ('json', ):
@@ -164,7 +164,6 @@ class CustomCards():
     async def force_reload(self):
         """Force data refresh."""
         await self.log.debug('force_reload', 'Started')
-        await self.localcards()
         await self.get_info_all_cards(True)
         await self.get_sensor_data()
 
@@ -278,7 +277,8 @@ class CustomCards():
         returnvalue = None
         jsonfile = "{}/.storage/custom_updater.cards".format(self.base_dir)
         if os.path.isfile(jsonfile):
-            with open(jsonfile) as storagefile:
+            with open(
+                jsonfile, encoding='utf-8', errors='ignore') as storagefile:
                 try:
                     load = json.load(storagefile)
                 except Exception as error:  # pylint: disable=W0703
@@ -299,7 +299,8 @@ class CustomCards():
             if localdir is not None:
                 card['dir'] = localdir
             load[name] = card
-            with open(jsonfile, 'w') as outfile:
+            with open(
+                jsonfile, 'w', encoding='utf-8', errors='ignore') as outfile:
                 json.dump(load, outfile, indent=4)
                 outfile.close()
         await self.log.debug('local_data', returnvalue)
@@ -311,7 +312,7 @@ class CustomCards():
         resources = {}
         jsonfile = "{}/.storage/lovelace".format(self.base_dir)
         if os.path.isfile(jsonfile):
-            with open(jsonfile) as localfile:
+            with open(jsonfile, encoding='utf-8', errors='ignore') as localfile:
                 load = json.load(localfile)
                 resources = load['data']['config'].get('resources', {})
                 localfile.close()
@@ -328,7 +329,7 @@ class CustomCards():
         resources = {}
         yamlfile = "{}/ui-lovelace.yaml".format(self.base_dir)
         if os.path.isfile(yamlfile):
-            with open(yamlfile) as localfile:
+            with open(yamlfile, encoding='utf-8', errors='ignore') as localfile:
                 load = yaml.load(localfile, Loader)
                 resources = load.get('resources', {})
                 localfile.close()
@@ -350,12 +351,7 @@ class CustomCards():
         else:
             resources = await self.yaml_resources()
         for entry in resources:
-            try:
-                if entry['url'][:4] == 'http':
-                    continue
-            except Exception as error:
-                msg = "{} - {}".format(error, entry)
-                self.log.warning('localcards', msg)
+            if entry['url'][:4] == 'http':
                 continue
             local_cards.append(entry['url'].split('/')[-1].split('.js')[0])
         self.local_cards = local_cards

@@ -3,7 +3,7 @@ import setuptools
 
 setuptools.setup(
     name="pyupdate",
-    version='1.1.2',
+    version='1.1.3',
     author="Joakim Sorensen",
     author_email="ludeeus@gmail.com",
     description="A python package to update stuff.",
