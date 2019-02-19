@@ -1,12 +1,10 @@
 """Logic to handle custom_components."""
 import os
 import re
-import logging
 import requests
 from requests import RequestException
 from pyupdate.ha_custom import common
-
-LOGGER = logging.getLogger(__name__)
+from pyupdate.log import Logger
 
 
 class CustomComponents():
@@ -17,9 +15,12 @@ class CustomComponents():
         self.base_dir = base_dir
         self.custom_repos = custom_repos
         self.remote_info = {}
+        self.log = Logger(self.__class__.__name__)
 
     async def get_info_all_components(self, force=False):
         """Return all remote info if any."""
+        await self.log.debug(
+            'get_info_all_components', 'Started with force ' + str(force))
         if not force and self.remote_info:
             return self.remote_info
         remote_info = {}
@@ -44,12 +45,14 @@ class CustomComponents():
                             print('Could not get remote info for ' + name)
             except RequestException:
                 print('Could not get remote info for ' + url)
-        LOGGER.debug('get_info_all_components: %s', remote_info)
+        await self.log.debug('get_info_all_components', remote_info)
         self.remote_info = remote_info
         return remote_info
 
     async def get_sensor_data(self, force=False):
         """Get sensor data."""
+        await self.log.debug(
+            'get_sensor_data', 'Started with force ' + str(force))
         components = await self.get_info_all_components(force)
         cahce_data = {}
         cahce_data['domain'] = 'custom_components'
@@ -75,31 +78,33 @@ class CustomComponents():
                         "repo": component[4],
                         "change_log": component[5],
                     }
-        LOGGER.debug('get_sensor_data: [%s, %s]', cahce_data, count_updateable)
+        await self.log.debug(
+            'get_sensor_data', '[{}, {}]'.format(cahce_data, count_updateable))
         return [cahce_data, count_updateable]
 
     async def update_all(self):
         """Update all components."""
+        await self.log.debug('update_all', 'Started')
         updates = await self.get_sensor_data()
         updates = updates[0]['has_update']
         if updates is not None:
-            LOGGER.info('update_all: "%s"', updates)
+            await self.log.debug('update_all', updates)
             for name in updates:
                 await self.upgrade_single(name)
             await self.get_info_all_components(force=True)
         else:
-            LOGGER.debug('update_all: No updates avaiable.')
+            await self.log.debug('update_all', 'No updates avaiable')
 
     async def upgrade_single(self, name):
         """Update one component."""
-        LOGGER.debug('upgrade_single started: "%s"', name)
+        await self.log.info('upgrade_single', name + ' started')
         remote_info = await self.get_info_all_components()
         remote_info = remote_info[name]
         remote_file = remote_info[3]
         local_file = self.base_dir + '/' + str(remote_info[2])
         await common.download_file(local_file, remote_file)
         await self.update_requirements(local_file)
-        LOGGER.info('upgrade_single finished: "%s"', name)
+        await self.log.info('upgrade_single', name + ' finished')
 
     async def install(self, name):
         """Install single component."""
@@ -114,6 +119,7 @@ class CustomComponents():
 
     async def get_local_version(self, path):
         """Return the local version if any."""
+        await self.log.debug('get_local_version', 'Started for ' + path)
         return_value = ''
         if os.path.isfile(path):
             with open(path, 'r') as local:
@@ -127,6 +133,7 @@ class CustomComponents():
 
     async def update_requirements(self, path):
         """Update the requirements for a python file."""
+        await self.log.debug('update_requirements', 'Started for ' + path)
         requirements = None
         if os.path.isfile(path):
             with open(path, 'r') as local:
@@ -143,5 +150,5 @@ class CustomComponents():
             local.close()
             if requirements is not None:
                 for package in requirements.split(' '):
-                    LOGGER.info('Upgrading %s', package)
+                    await self.log.info('update_requirements ', package)
                     await common.update(package)

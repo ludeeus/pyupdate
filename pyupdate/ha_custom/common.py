@@ -99,5 +99,5 @@ async def replace_all(file, search, replace):
 async def update(package):
     """Update a pip package."""
     await LOGGER.debug('update', 'Starting upgrade of {}'.format(package))
-    await subprocess.call(
+    subprocess.call(
         [sys.executable, "-m", "pip", "install", "--upgrade", package])
