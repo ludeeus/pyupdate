@@ -74,12 +74,13 @@ class CustomCards():
                 if response.status_code == 200:
                     for name, card in response.json().items():
                         try:
-                            entry = {}
-                            entry['name'] = name
-                            entry['version'] = card['version']
-                            entry['remote_location'] = card['remote_location']
-                            entry['visit_repo'] = card['visit_repo']
-                            entry['changelog'] = card['changelog']
+                            if name in remote_info:
+                                entry = remote_info.get(name, {})
+                            else:
+                                entry = {}
+                            for attr in card:
+                                entry['name'] = name
+                                entry[attr] = card[attr]
                             remote_info[name] = entry
                         except KeyError:
                             print('Could not get remote info for ' + name)
