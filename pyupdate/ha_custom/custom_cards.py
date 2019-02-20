@@ -414,7 +414,7 @@ class CustomCards():
             dev = card_dir.split('/')[0]
             card = card_dir.split('/')[1]
             card_dir = "{}/www/github/{}".format(self.base_dir, dev)
-            await self.local_data(card, 'set', localdir=card_dir)
+            await self.local_data(card, 'set', localdir=card_dir + '/')
             if not os.path.exists("{}/{}.js".format(card_dir, card)):
                 msg = "{}/{}.js not found".format(card_dir, card)
                 await self.log.info('super_custom', msg)
