@@ -87,8 +87,9 @@ class CustomCards():
             except RequestException:
                 print('Could not get remote info for ' + url)
         self.remote_info = remote_info
+        stats = {'count': len(remote_info), 'cards': remote_info.keys()}
         await self.log.debug(
-            'get_info_all_cards', 'Updated stored data ' + str(remote_info))
+            'get_info_all_cards', 'Updated stored data ' + str(stats))
         return remote_info
 
     async def init_local_data(self):

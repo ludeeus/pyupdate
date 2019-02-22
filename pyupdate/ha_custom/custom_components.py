@@ -45,7 +45,8 @@ class CustomComponents():
                             print('Could not get remote info for ' + name)
             except RequestException:
                 print('Could not get remote info for ' + url)
-        await self.log.debug('get_info_all_components', remote_info)
+        stats = {'count': len(remote_info), 'components': remote_info.keys()}
+        await self.log.debug('get_info_all_components', stats)
         self.remote_info = remote_info
         return remote_info
 

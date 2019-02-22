@@ -48,8 +48,13 @@ async def check_local_premissions(file):
 
 async def check_remote_access(file):
     """Check access to remote file."""
-    test_remote_file = requests.get(file)
-    return bool(test_remote_file.status_code == 200)
+    returnvalue = False
+    try:
+        test_remote_file = requests.get(file)
+        returnvalue = bool(test_remote_file.status_code == 200)
+    except:
+        LOGGER.debug('check_remote_access', 'no access to ' + file)
+    return returnvalue
 
 
 async def download_file(local_file, remote_file):
