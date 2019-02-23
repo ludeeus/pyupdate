@@ -44,7 +44,9 @@ class PythonScripts():
                             print('Could not get remote info for ' + name)
             except RequestException:
                 print('Could not get remote info for ' + url)
-        LOGGER.debug('get_info_all_python_scripts: %s', remote_info)
+        stats = {'count': len(remote_info),
+                 'python_scripts': remote_info.keys()}
+        LOGGER.debug('get_info_all_python_scripts: %s', stats)
         self.remote_info = remote_info
         return remote_info
 

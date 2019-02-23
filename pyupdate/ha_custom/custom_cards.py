@@ -421,6 +421,6 @@ class CustomCards():
                     msg = "{}/{}.js not found".format(card_dir, card)
                     await self.log.info('super_custom', msg)
                     await self.upgrade_single(card)
-            except:  # pylint: disable=W0703
+            except Exception:  # pylint: disable=W0703
                 await self.log.debug(
                     'super_custom', 'Problem running sequence for ' + url)
