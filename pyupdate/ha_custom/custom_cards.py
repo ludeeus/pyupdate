@@ -407,16 +407,20 @@ class CustomCards():
     async def super_custom(self):
         """Super custom stuff."""
         for url in self.super_custom_url:
-            response = requests.get(url)
-            if response.status_code == 200:
-                if len(response.json()) != 1:
-                    continue
-            card_dir = url.split('.com/')[1].split('/master')[0]
-            dev = card_dir.split('/')[0]
-            card = card_dir.split('/')[1]
-            card_dir = "{}/www/github/{}".format(self.base_dir, dev)
-            await self.local_data(card, 'set', localdir=card_dir + '/')
-            if not os.path.exists("{}/{}.js".format(card_dir, card)):
-                msg = "{}/{}.js not found".format(card_dir, card)
-                await self.log.info('super_custom', msg)
-                await self.upgrade_single(card)
+            try:
+                response = requests.get(url)
+                if response.status_code == 200:
+                    if len(response.json()) != 1:
+                        continue
+                card_dir = url.split('.com/')[1].split('/master')[0]
+                dev = card_dir.split('/')[0]
+                card = card_dir.split('/')[1]
+                card_dir = "{}/www/github/{}".format(self.base_dir, dev)
+                await self.local_data(card, 'set', localdir=card_dir + '/')
+                if not os.path.exists("{}/{}.js".format(card_dir, card)):
+                    msg = "{}/{}.js not found".format(card_dir, card)
+                    await self.log.info('super_custom', msg)
+                    await self.upgrade_single(card)
+            except:  # pylint: disable=W0703
+                await self.log.debug(
+                    'super_custom', 'Problem running sequence for ' + url)

@@ -52,7 +52,7 @@ async def check_remote_access(file):
     try:
         test_remote_file = requests.get(file)
         returnvalue = bool(test_remote_file.status_code == 200)
-    except:
+    except:  # pylint: disable=W0703
         LOGGER.debug('check_remote_access', 'no access to ' + file)
     return returnvalue
 
