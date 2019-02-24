@@ -60,7 +60,7 @@ class CustomComponents():
         if components:
             for name, component in components.items():
                 remote_version = component['version']
-                local_file = self.base_dir + '/' + str(component['local_location'])
+                local_file = self.base_dir + str(component['local_location'])
                 local_version = await self.get_local_version(local_file)
                 has_update = (
                     remote_version and remote_version != local_version)
@@ -182,8 +182,11 @@ class CustomComponents():
             resources = componentdata.get('resources', [])
             await self.log.debug('downlaod_component_resources', resources)
             for resource in resources:
-                target = self.base_dir + componentdata['local_location'].split('__init__')[0]
+                target = self.base_dir + componentdata['local_location']
+                target = target.split('__init__')[0]
                 target = "{}{}".format(target, resource.split('/')[-1])
-                await self.log.debug('downlaod_component_resources', 'resource: ' + resource)
-                await self.log.debug('downlaod_component_resources', 'target: ' + target)
+                await self.log.debug(
+                    'downlaod_component_resources', 'resource: ' + resource)
+                await self.log.debug(
+                    'downlaod_component_resources', 'target: ' + target)
                 await common.download_file(target, resource)
