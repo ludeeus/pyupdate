@@ -107,7 +107,7 @@ class CustomCards():
                     await self.log.debug(
                         'init_local_data',
                         'Setting initial version for {}'.format(card))
-                    version = await self.get_remote_version(card)
+                    version = ""
                 await self.log.debug(
                     'init_local_data', 'Setting path for {}'.format(card))
                 path = await self.get_card_dir(card, True)
@@ -358,6 +358,8 @@ class CustomCards():
         await self.log.debug('localcards', 'Started')
         await self.log.debug(
             'localcards', 'Getting local cards with mode: ' + self.mode)
+        if not self.remote_info:
+            await self.get_info_all_cards()
         local_cards = []
         super_custom_url = []
         resources = {}
@@ -379,7 +381,11 @@ class CustomCards():
                 dev = clean.split('/')[0]
                 card = clean.split('/')[1]
                 base = base + "{}/{}/master/".format(dev, card)
-                if await common.check_remote_access(base + 'custom_card.json'):
+                await self.log.error('localcards', card)
+                if card in self.remote_info:
+                    await self.log.error('localcards', 'in self.remote_info')
+                    remote_exist = True
+                elif await common.check_remote_access(base + 'custom_card.json'):
                     remote_exist = True
                     base = base + 'custom_card.json'
                 elif await common.check_remote_access(base + 'tracker.json'):
@@ -392,8 +398,6 @@ class CustomCards():
                         base + 'custom_updater.json'):
                     remote_exist = True
                     base = base + 'custom_updater.json'
-                elif self.remote_info is not None and card in self.remote_info:
-                    remote_exist = True
                 if remote_exist:
                     super_custom_url.append(base)
                     card_dir = self.base_dir + "/www/github/" + dev
@@ -408,11 +412,14 @@ class CustomCards():
         """Super custom stuff."""
         for url in self.super_custom_url:
             try:
-                response = requests.get(url)
-                if response.status_code == 200:
-                    if len(response.json()) != 1:
-                        continue
-                card_dir = url.split('.com/')[1].split('/master')[0]
+                if url.split('/master/')[0].split('/')[1] in self.remote_info:
+                    card_dir = url.split('.com/')[1].split('/master')[0]
+                else:
+                    response = requests.get(url)
+                    if response.status_code == 200:
+                        if len(response.json()) != 1:
+                            continue
+                    card_dir = url.split('.com/')[1].split('/master')[0]
                 dev = card_dir.split('/')[0]
                 card = card_dir.split('/')[1]
                 card_dir = "{}/www/github/{}".format(self.base_dir, dev)
