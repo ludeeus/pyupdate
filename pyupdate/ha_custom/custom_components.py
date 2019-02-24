@@ -31,16 +31,14 @@ class CustomComponents():
                 if response.status_code == 200:
                     for name, component in response.json().items():
                         try:
-                            component = [
-                                name,
-                                component['version'],
-                                await common.normalize_path(
-                                    component['local_location']),
-                                component['remote_location'],
-                                component['visit_repo'],
-                                component['changelog']
-                            ]
-                            remote_info[name] = component
+                            if name in remote_info:
+                                entry = remote_info.get(name, {})
+                            else:
+                                entry = {}
+                            for attr in component:
+                                entry['name'] = name
+                                entry[attr] = component[attr]
+                            remote_info[name] = entry
                         except KeyError:
                             print('Could not get remote info for ' + name)
             except RequestException:
@@ -61,8 +59,8 @@ class CustomComponents():
         count_updateable = 0
         if components:
             for name, component in components.items():
-                remote_version = component[1]
-                local_file = self.base_dir + '/' + str(component[2])
+                remote_version = component['version']
+                local_file = self.base_dir + '/' + str(component['local_location'])
                 local_version = await self.get_local_version(local_file)
                 has_update = (
                     remote_version and remote_version != local_version)
@@ -76,8 +74,8 @@ class CustomComponents():
                         "remote": remote_version,
                         "has_update": has_update,
                         "not_local": not_local,
-                        "repo": component[4],
-                        "change_log": component[5],
+                        "repo": component['visit_repo'],
+                        "change_log": component['changelog'],
                     }
         await self.log.debug(
             'get_sensor_data', '[{}, {}]'.format(cahce_data, count_updateable))
@@ -101,21 +99,30 @@ class CustomComponents():
         await self.log.info('upgrade_single', name + ' started')
         remote_info = await self.get_info_all_components()
         remote_info = remote_info[name]
-        remote_file = remote_info[3]
-        local_file = self.base_dir + '/' + str(remote_info[2])
+        remote_file = remote_info['remote_location']
+        local_file = self.base_dir + str(remote_info['local_location'])
         await common.download_file(local_file, remote_file)
+        await self.downlaod_component_resources(name)
         await self.update_requirements(local_file)
         await self.log.info('upgrade_single', name + ' finished')
 
     async def install(self, name):
         """Install single component."""
-        sdata = await self.get_sensor_data()
-        if name in sdata[0]:
+        sdata = await self.component_data(name)
+        await self.log.debug('install', name)
+        if sdata:
+            await self.log.debug('install', sdata)
+            path = None
+            comppath = self.base_dir + str(sdata['local_location'])
+            await self.log.debug('install', comppath)
             if '.' in name:
-                component = str(name).split('.')[0]
-                path = self.base_dir + '/custom_components/' + component
-                if not os.path.isdir(path):
-                    os.mkdir(path)
+                path = comppath.split(name)[0]
+            elif comppath.split('/')[-1] == '__init__.py':
+                path = comppath.split('__init__')[0]
+            await self.log.debug('install', path)
+            if path is not None:
+                await self.log.debug('install', 'Creating dirs ' + path)
+                os.makedirs(path, exist_ok=True)
             await self.upgrade_single(name)
 
     async def get_local_version(self, path):
@@ -153,3 +160,30 @@ class CustomComponents():
                 for package in requirements.split(' '):
                     await self.log.info('update_requirements ', package)
                     await common.update(package)
+
+    async def component_data(self, name):
+        """Return component_data."""
+        data = {}
+        if self.remote_info is None:
+            await self.get_info_all_components(True)
+        component = self.remote_info.get(name, {})
+        if component:
+            data = component
+        return data
+
+    async def downlaod_component_resources(self, name):
+        """Download extra resources for component."""
+        await self.log.debug('downlaod_component_resources', 'Started')
+        componentdata = await self.component_data(name)
+        iscomponent = False
+        if componentdata['local_location'].split('/')[-1] == '__init__.py':
+            iscomponent = True
+        if iscomponent:
+            resources = componentdata.get('resources', [])
+            await self.log.debug('downlaod_component_resources', resources)
+            for resource in resources:
+                target = self.base_dir + componentdata['local_location'].split('__init__')[0]
+                target = "{}{}".format(target, resource.split('/')[-1])
+                await self.log.debug('downlaod_component_resources', 'resource: ' + resource)
+                await self.log.debug('downlaod_component_resources', 'target: ' + target)
+                await common.download_file(target, resource)
