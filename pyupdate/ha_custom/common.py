@@ -52,7 +52,6 @@ async def check_remote_access(file):
     try:
         test_remote_file = requests.get(file)
         returnvalue = bool(test_remote_file.status_code == 200)
-        await LOGGER.debug('check_remote_access', 'access to remote file' + returnvalue)
     except Exception:  # pylint: disable=W0703
         await LOGGER.debug('check_remote_access', 'no access to ' + file)
     return returnvalue

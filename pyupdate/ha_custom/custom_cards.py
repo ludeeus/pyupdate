@@ -381,11 +381,10 @@ class CustomCards():
                 dev = clean.split('/')[0]
                 card = clean.split('/')[1]
                 base = base + "{}/{}/master/".format(dev, card)
-                await self.log.error('localcards', card)
                 if card in self.remote_info:
-                    await self.log.error('localcards', 'in self.remote_info')
                     remote_exist = True
-                elif await common.check_remote_access(base + 'custom_card.json'):
+                elif await common.check_remote_access(
+                        base + 'custom_card.json'):
                     remote_exist = True
                     base = base + 'custom_card.json'
                 elif await common.check_remote_access(base + 'tracker.json'):
