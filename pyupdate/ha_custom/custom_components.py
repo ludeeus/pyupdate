@@ -152,6 +152,8 @@ class CustomComponents():
                 except Exception as err:  # pylint: disable=W0703
                     await self.log.debug('get_local_version', str(err))
             sys.path[:] = path  # restore
+            if module_name in sys.modules:
+                del sys.modules[module_name]
         await self.log.debug('get_local_version', return_value)
         return return_value
 
