@@ -1,6 +1,7 @@
 """Logic to handle custom_components."""
 import os
 import re
+import sys
 import requests
 from requests import RequestException
 from pyupdate.ha_custom import common
@@ -126,18 +127,32 @@ class CustomComponents():
                 os.makedirs(path, exist_ok=True)
             await self.upgrade_single(name)
 
-    async def get_local_version(self, path):
+    async def get_local_version(self, localpath):
         """Return the local version if any."""
-        await self.log.debug('get_local_version', 'Started for ' + path)
+        await self.log.debug('get_local_version', 'Started for ' + localpath)
         return_value = ''
-        if os.path.isfile(path):
-            with open(path, 'r') as local:
-                ret = re.compile(
-                    r"^\b(VERSION|__version__)\s*=\s*['\"](.*)['\"]")
-                for line in local.readlines():
-                    matcher = ret.match(line)
-                    if matcher:
-                        return_value = str(matcher.group(2))
+        if os.path.isfile(localpath):
+            filename = localpath
+            directory, module_name = os.path.split(filename)
+            module_name = os.path.splitext(module_name)[0]
+            path = list(sys.path)
+            sys.path.insert(0, directory)
+            try:
+                module = __import__(module_name)
+            except Exception as err:  # pylint: disable=W0703
+                module = None
+                await self.log.debug('get_local_version', str(err))
+            if module is not None:
+                try:
+                    return_value = module.__version__
+                except Exception as err:  # pylint: disable=W0703
+                    await self.log.debug('get_local_version', str(err))
+                try:
+                    return_value = module.VERSION
+                except Exception as err:  # pylint: disable=W0703
+                    await self.log.debug('get_local_version', str(err))
+            sys.path[:] = path # restore
+        await self.log.debug('get_local_version', return_value)
         return return_value
 
     async def update_requirements(self, path):
