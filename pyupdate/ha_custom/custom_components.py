@@ -131,7 +131,7 @@ class CustomComponents():
         """Return the local version if any."""
         await self.log.debug('get_local_version', 'Started for ' + localpath)
         if '.' in name:
-            name = "{}.{}".format(name.split('.')[1],name.split('.')[0])
+            name = "{}.{}".format(name.split('.')[1], name.split('.')[0])
         return_value = ''
         if os.path.isfile(localpath):
             allm = sys.modules
