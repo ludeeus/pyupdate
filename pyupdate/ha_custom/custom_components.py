@@ -62,7 +62,7 @@ class CustomComponents():
             for name, component in components.items():
                 remote_version = component['version']
                 local_file = self.base_dir + str(component['local_location'])
-                local_version = await self.get_local_version(local_file)
+                local_version = await self.get_local_version(local_file, name)
                 has_update = (
                     remote_version and remote_version != local_version)
                 not_local = (remote_version and not local_version)
@@ -127,34 +127,31 @@ class CustomComponents():
                 os.makedirs(path, exist_ok=True)
             await self.upgrade_single(name)
 
-    async def get_local_version(self, localpath):
+    async def get_local_version(self, localpath, name):
         """Return the local version if any."""
         await self.log.debug('get_local_version', 'Started for ' + localpath)
+        if '.' in name:
+            name = "{}.{}".format(name.split('.')[1],name.split('.')[0])
         return_value = ''
         if os.path.isfile(localpath):
-            filename = localpath
-            directory, module_name = os.path.split(filename)
-            module_name = os.path.splitext(module_name)[0]
-            path = list(sys.path)
-            sys.path.insert(0, directory)
-            try:
-                module = __import__(module_name)
-            except Exception as err:  # pylint: disable=W0703
-                module = None
-                await self.log.debug('get_local_version', str(err))
-            if module is not None:
-                try:
-                    return_value = module.__version__
-                except Exception as err:  # pylint: disable=W0703
-                    await self.log.debug('get_local_version', str(err))
-                try:
-                    return_value = module.VERSION
-                except Exception as err:  # pylint: disable=W0703
-                    await self.log.debug('get_local_version', str(err))
-            sys.path[:] = path  # restore
-            if module_name in sys.modules:
-                del sys.modules[module_name]
-        await self.log.debug('get_local_version', return_value)
+            allm = sys.modules
+            for module in allm:
+                if "custom_components.{}".format(name) in module:
+                    package = "custom_components.{}".format(name)
+                    try:
+                        name = "__version__"
+                        return_value = getattr(
+                            __import__(package, fromlist=[name]), name)
+                    except Exception as err:  # pylint: disable=W0703
+                        await self.log.debug('get_local_version', str(err))
+                    if return_value == '':
+                        try:
+                            name = "VERSION"
+                            return_value = getattr(
+                                __import__(package, fromlist=[name]), name)
+                        except Exception as err:  # pylint: disable=W0703
+                            await self.log.debug('get_local_version', str(err))
+        await self.log.debug('get_local_version', str(return_value))
         return return_value
 
     async def update_requirements(self, path):
