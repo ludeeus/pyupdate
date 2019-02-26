@@ -366,13 +366,12 @@ class CustomCards():
             await self.get_info_all_cards()
         local_cards = []
         super_custom_url = []
-        resources = {}
         if self.resources is None:
             if self.mode == 'storage':
                 self.resources = await self.storage_resources()
             else:
                 self.resources = await self.yaml_resources()
-        for entry in resources:
+        for entry in self.resources:
             url = entry['url']
             if '?track=false' in url or '?track=False' in url:
                 continue
