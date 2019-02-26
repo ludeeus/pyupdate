@@ -54,6 +54,7 @@ class CustomCards():
         self.super_custom_url = []
         self.custom_repos = custom_repos
         self.remote_info = None
+        self.resources = None
 
     async def get_info_all_cards(self, force=False):
         """Return all remote info if any."""
@@ -173,6 +174,10 @@ class CustomCards():
     async def force_reload(self):
         """Force data refresh."""
         await self.log.debug('force_reload', 'Started')
+        if self.mode == 'storage':
+            self.resources = await self.storage_resources()
+        else:
+            self.resources = await self.yaml_resources()
         await self.localcards()
         await self.get_info_all_cards(True)
         await self.super_custom()
@@ -226,7 +231,6 @@ class CustomCards():
     async def get_card_dir(self, name, force=False):
         """Get card dir."""
         await self.log.debug('get_card_dir', 'Started')
-        resources = {}
         card_dir = None
         stored_dir = await self.local_data(name)
         stored_dir = stored_dir.get('dir', None)
@@ -234,12 +238,12 @@ class CustomCards():
             await self.log.debug(
                 'get_card_dir', 'Using stored data for {}'.format(name))
             return stored_dir
-
-        if self.mode == 'storage':
-            resources = await self.storage_resources()
-        else:
-            resources = await self.yaml_resources()
-        for entry in resources:
+        if self.resources is None:
+            if self.mode == 'storage':
+                self.resources = await self.storage_resources()
+            else:
+                self.resources = await self.yaml_resources()
+        for entry in self.resources:
             if entry['url'][:4] == 'http':
                 continue
             entry_name = entry['url'].split('/')[-1].split('.js')[0]
@@ -363,10 +367,11 @@ class CustomCards():
         local_cards = []
         super_custom_url = []
         resources = {}
-        if self.mode == 'storage':
-            resources = await self.storage_resources()
-        else:
-            resources = await self.yaml_resources()
+        if self.resources is None:
+            if self.mode == 'storage':
+                self.resources = await self.storage_resources()
+            else:
+                self.resources = await self.yaml_resources()
         for entry in resources:
             url = entry['url']
             if '?track=false' in url or '?track=False' in url:
