@@ -151,7 +151,22 @@ class CustomComponents():
                                 __import__(package, fromlist=[name]), name)
                         except Exception as err:  # pylint: disable=W0703
                             await self.log.debug('get_local_version', str(err))
+        if return_value == '':
+            return_value = await self.fallback_version(localpath)
         await self.log.debug('get_local_version', str(return_value))
+        return return_value
+
+    async def fallback_version(self, localpath):
+        """Return version from regex match."""
+        return_value = ''
+        if os.path.isfile(localpath):
+            with open(localpath, 'r') as local:
+                ret = re.compile(
+                    r"^\b(VERSION|__version__)\s*=\s*['\"](.*)['\"]")
+                for line in local.readlines():
+                    matcher = ret.match(line)
+                    if matcher:
+                        return_value = str(matcher.group(2))
         return return_value
 
     async def update_requirements(self, path):
