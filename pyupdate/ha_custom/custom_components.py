@@ -205,18 +205,15 @@ class CustomComponents():
         """Download extra resources for component."""
         await self.log.debug('downlaod_component_resources', 'Started')
         componentdata = await self.component_data(name)
-        iscomponent = False
-        if componentdata['local_location'].split('/')[-1] == '__init__.py':
-            iscomponent = True
-        if iscomponent:
-            resources = componentdata.get('resources', [])
-            await self.log.debug('downlaod_component_resources', resources)
-            for resource in resources:
-                target = self.base_dir + componentdata['local_location']
-                target = target.split('__init__')[0]
-                target = "{}{}".format(target, resource.split('/')[-1])
-                await self.log.debug(
-                    'downlaod_component_resources', 'resource: ' + resource)
-                await self.log.debug(
-                    'downlaod_component_resources', 'target: ' + target)
-                await common.download_file(target, resource)
+        resources = componentdata.get('resources', [])
+        await self.log.debug('downlaod_component_resources', resources)
+        for resource in resources:
+            target = self.base_dir + componentdata['local_location']
+            remove = target.split('/')[-1]
+            target = target.split(remove)[0]
+            target = "{}{}".format(target, resource.split('/')[-1])
+            await self.log.debug(
+                'downlaod_component_resources', 'resource: ' + resource)
+            await self.log.debug(
+                'downlaod_component_resources', 'target: ' + target)
+            await common.download_file(target, resource)
