@@ -1,7 +1,3 @@
-# pyupdate [![Build Status](https://travis-ci.com/ludeeus/pyupdate.svg?branch=master)](https://travis-ci.com/ludeeus/pyupdate) [![PyPI version](https://badge.fury.io/py/pyupdate.svg)](https://badge.fury.io/py/pyupdate)
+# pyupdate [DEPRECATED]
 
-_A python package to update stuff._
-
-Documentation:
-
-https://ludeeus.github.io/pyupdate/
+This lib was used for [custom_updater](https://github.com/custom-components/custom_updater) and that project is now deprecated.
